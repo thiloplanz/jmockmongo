@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>jmockmongo</groupId>
+  <artifactId>jmockmongo</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Mocking MongoDB</name>
+  <description>Disturbingly incomplete in-memory MongoDB implementation for use in automated testing</description>
+  <licenses>
+		<license>
+			<name>Apache License Version 2.0</name>
+		</license>
+	</licenses>
+	<inceptionYear>2012</inceptionYear>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<configuration>
+					<basedir>${basedir}/src</basedir>
+					<header>${basedir}/src/license_header_apachev2.txt</header>
+					<strictCheck>true</strictCheck>
+				</configuration>
+			</plugin>
+			
+		</plugins>
+	</build>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.mongodb</groupId>
+  		<artifactId>mongo-java-driver</artifactId>
+  		<version>2.7.3</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>3.8.2</version>
+  		<type>jar</type>
+  		<scope>test</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>io.netty</groupId>
+  		<artifactId>netty</artifactId>
+  		<version>3.3.1.Final</version>
+  		<scope>compile</scope>
+  	</dependency>
+  </dependencies>
+</project>
