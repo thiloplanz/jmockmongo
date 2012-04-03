@@ -107,6 +107,8 @@ abstract class Message {
 			return new QueryMessage(buffer.readBytes(messageLength));
 		case InsertMessage.OP_CODE_INSERT:
 			return new InsertMessage(buffer.readBytes(messageLength));
+		case UpdateMessage.OP_CODE_UPDATE:
+			return new UpdateMessage(buffer.readBytes(messageLength));
 		default:
 			throw new IllegalArgumentException(String.format(
 					"message buffer has unsupported opcode (%d)", opCode));

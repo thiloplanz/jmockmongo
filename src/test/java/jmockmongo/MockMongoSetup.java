@@ -57,4 +57,9 @@ public abstract class MockMongoSetup extends TestCase {
 		assertEquals(expected, BSONUtils.get(doc, field));
 	}
 
+	protected void prepareMockData(String fullCollectionName, BSONObject data) {
+		MockDBCollection c = mongo.getOrCreateCollection(fullCollectionName);
+		c.insert(data);
+	}
+
 }

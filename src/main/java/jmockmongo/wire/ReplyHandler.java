@@ -24,6 +24,7 @@ import java.util.Map;
 import jmockmongo.CommandHandler;
 import jmockmongo.InsertHandler;
 import jmockmongo.QueryHandler;
+import jmockmongo.UpdateHandler;
 
 import org.bson.BSONObject;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -38,6 +39,8 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 	private InsertHandler insertHandler;
 
+	private UpdateHandler updateHandler;
+
 	public void setCommandHandler(String command, CommandHandler handler) {
 		commands.put(command, handler);
 	}
@@ -48,6 +51,10 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 	public void setInsertHandler(InsertHandler handler) {
 		insertHandler = handler;
+	}
+
+	public void setUpdateHandler(UpdateHandler handler) {
+		updateHandler = handler;
 	}
 
 	@Override
@@ -93,6 +100,17 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 				String[] db = fc.split("\\.", 2);
 				insertHandler.handleInsert(db[0], db[1], false, insert
 						.documents());
+				return;
+			}
+		}
+
+		if (request instanceof UpdateMessage) {
+			if (updateHandler != null) {
+				UpdateMessage update = (UpdateMessage) request;
+				String fc = update.getFullCollectionName();
+				String[] db = fc.split("\\.", 2);
+				updateHandler.handleUpdate(db[0], db[1], false, false, update
+						.getSelector(), update.getUpdate());
 				return;
 			}
 		}

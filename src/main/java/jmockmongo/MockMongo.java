@@ -72,6 +72,11 @@ public class MockMongo {
 		return db.getCollection(fc[1]);
 	}
 
+	MockDBCollection getOrCreateCollection(String fullCollectionName) {
+		String[] fc = fullCollectionName.split("\\.", 2);
+		return getOrCreateDB(fc[0]).getOrCreateCollection(fc[1]);
+	}
+
 	MockDBCollection getCollection(String database, String collectionName) {
 		MockDB db = getDB(database);
 		if (db == null)
@@ -88,18 +93,24 @@ public class MockMongo {
 		channels = new DefaultChannelGroup("jmockmongo");
 		bootstrap = new ServerBootstrap(factory);
 
-		final ReplyHandler handler = new ReplyHandler();
-		handler.setCommandHandler("isMaster", new IsMaster());
-		handler.setCommandHandler("listDatabases", new ListDatabases());
-		handler.setCommandHandler("count", new Count());
-		handler.setCommandHandler("getlasterror", new GetLastError());
-
-		handler.setQueryHandler(new DefaultQueryHandler(this));
-
-		handler.setInsertHandler(new DefaultInsertHandler(this));
-
 		bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 			public ChannelPipeline getPipeline() {
+
+				final ReplyHandler handler = new ReplyHandler();
+				handler.setCommandHandler("isMaster", new IsMaster());
+				handler.setCommandHandler("listDatabases", new ListDatabases());
+				handler.setCommandHandler("count", new Count());
+				handler.setCommandHandler("getlasterror", new GetLastError());
+
+				handler
+						.setQueryHandler(new DefaultQueryHandler(MockMongo.this));
+
+				handler.setInsertHandler(new DefaultInsertHandler(
+						MockMongo.this));
+
+				handler.setUpdateHandler(new DefaultUpdateHandler(
+						MockMongo.this));
+
 				return Channels.pipeline(new SimpleChannelHandler() {
 
 					@Override
