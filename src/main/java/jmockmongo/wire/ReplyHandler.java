@@ -24,6 +24,7 @@ import java.util.Map;
 import jmockmongo.CommandHandler;
 import jmockmongo.InsertHandler;
 import jmockmongo.QueryHandler;
+import jmockmongo.Result;
 import jmockmongo.UpdateHandler;
 
 import org.bson.BSONObject;
@@ -34,6 +35,8 @@ import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 	private final Map<String, CommandHandler> commands = new HashMap<String, CommandHandler>();
+
+	private Result lastError;
 
 	private QueryHandler queryHandler;
 
@@ -78,6 +81,13 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 									0, result).getBytes());
 					return;
 				}
+				if ("getlasterror".equals(c)) {
+					BSONObject result = lastError.toBSON();
+					e.getChannel().write(
+							ReplyMessage.reply((Message) e.getMessage(), 0, 0,
+									0, result).getBytes());
+					return;
+				}
 
 				throw new UnsupportedOperationException("command " + c + " "
 						+ request.toString());
@@ -98,8 +108,8 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 				InsertMessage insert = (InsertMessage) request;
 				String fc = insert.getFullCollectionName();
 				String[] db = fc.split("\\.", 2);
-				insertHandler.handleInsert(db[0], db[1], false, insert
-						.documents());
+				lastError = insertHandler.handleInsert(db[0], db[1], false,
+						insert.documents());
 				return;
 			}
 		}
@@ -109,8 +119,8 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 				UpdateMessage update = (UpdateMessage) request;
 				String fc = update.getFullCollectionName();
 				String[] db = fc.split("\\.", 2);
-				updateHandler.handleUpdate(db[0], db[1], false, false, update
-						.getSelector(), update.getUpdate());
+				lastError = updateHandler.handleUpdate(db[0], db[1], false,
+						false, update.getSelector(), update.getUpdate());
 				return;
 			}
 		}

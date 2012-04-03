@@ -24,6 +24,6 @@ import org.bson.BSONObject;
 
 public interface InsertHandler {
 
-	public void handleInsert(String database, String collection,
+	public Result handleInsert(String database, String collection,
 			boolean continueOnError, Iterator<BSONObject> data);
 }

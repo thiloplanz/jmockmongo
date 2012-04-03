@@ -28,7 +28,7 @@ class DefaultUpdateHandler implements UpdateHandler {
 		this.mongo = mongo;
 	}
 
-	public void handleUpdate(String database, String collection,
+	public Result handleUpdate(String database, String collection,
 			boolean upsert, boolean multiUpdate, BSONObject selector,
 			BSONObject update) {
 
@@ -49,8 +49,10 @@ class DefaultUpdateHandler implements UpdateHandler {
 			for (String k : $set.keySet()) {
 				t.put(k, $set.get(k));
 			}
+			return new Result(1);
 		}
 
+		return new Result(0);
 	}
 
 }

@@ -22,7 +22,7 @@ import org.bson.BSONObject;
 
 public interface UpdateHandler {
 
-	public void handleUpdate(String database, String collection,
+	public Result handleUpdate(String database, String collection,
 			boolean upsert, boolean multiUpdate, BSONObject selector,
 			BSONObject update);
 

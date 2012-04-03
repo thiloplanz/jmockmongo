@@ -15,18 +15,32 @@
  * You should have received a copy of the License along with this program.
  * If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
  */
-
-package jmockmongo.commands;
-
-import jmockmongo.CommandHandler;
+package jmockmongo;
 
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
-public class GetLastError implements CommandHandler {
+public class Result {
 
-	public BSONObject handleCommand(String database, BSONObject command) {
-		return new BasicBSONObject("ok", 1);
+	private final boolean ok;
+
+	private final int n;
+
+	public Result(int n) {
+		ok = true;
+		this.n = n;
+	}
+
+	public boolean isOk() {
+		return ok;
+	}
+
+	public int getN() {
+		return n;
+	}
+
+	public BSONObject toBSON() {
+		return new BasicBSONObject("ok", ok ? 1 : 0).append("n", n);
 	}
 
 }

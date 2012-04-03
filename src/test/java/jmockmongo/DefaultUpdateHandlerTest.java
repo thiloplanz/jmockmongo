@@ -25,33 +25,35 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 public class DefaultUpdateHandlerTest extends MockMongoSetup {
 
-	// public void testUpdateNothing() throws UnknownHostException,
-	// MongoException, InterruptedException {
-	//
-	// Mongo m = new Mongo();
-	// WriteResult result = m.getDB("x").getCollection("x").update(
-	// new BasicDBObject("_id", "x"),
-	// new BasicDBObject("$set", new BasicDBObject("field", "test")),
-	// false, false, WriteConcern.SAFE);
-	// assertEquals(0, result.getN());
-	//
-	// }
+	public void testUpdateNothing() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		Mongo m = new Mongo();
+		WriteResult result = m.getDB("x").getCollection("x").update(
+				new BasicDBObject("_id", "x"),
+				new BasicDBObject("$set", new BasicDBObject("field", "test")),
+				false, false, WriteConcern.SAFE);
+		assertEquals(0, result.getN());
+
+	}
 
 	public void test$set() throws UnknownHostException, MongoException,
 			InterruptedException {
 
 		prepareMockData("x.x", new BasicBSONObject("_id", "x"));
 		Mongo m = new Mongo();
-		m.getDB("x").getCollection("x").update(
+		WriteResult result = m.getDB("x").getCollection("x").update(
 				new BasicDBObject("_id", "x"),
 				new BasicDBObject("$set", new BasicDBObject("field", "test")
 						.append("another", "foo")), false, false,
 				WriteConcern.SAFE);
 		assertMockMongoFieldEquals("test", "x.x", "x", "field");
 		assertMockMongoFieldEquals("foo", "x.x", "x", "another");
+		assertEquals(1, result.getN());
 
 	}
 

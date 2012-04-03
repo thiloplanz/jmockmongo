@@ -24,6 +24,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 public class DefaultInsertHandlerTest extends MockMongoSetup {
 
@@ -31,12 +32,14 @@ public class DefaultInsertHandlerTest extends MockMongoSetup {
 			InterruptedException {
 
 		Mongo m = new Mongo();
-		m.getDB("x").getCollection("x").insert(WriteConcern.SAFE,
+		WriteResult result = m.getDB("x").getCollection("x").insert(
+				WriteConcern.SAFE,
 				new BasicDBObject("_id", "x").append("field", "test"));
 
 		assertMockMongoFieldEquals("test", "x.x", "x", "field");
 		assertEquals("test", m.getDB("x").getCollection("x").findOne("x").get(
 				"field"));
+		assertEquals(1, result.getN());
 
 	}
 }

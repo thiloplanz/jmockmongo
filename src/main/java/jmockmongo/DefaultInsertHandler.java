@@ -30,14 +30,17 @@ class DefaultInsertHandler implements InsertHandler {
 		this.mongo = mongo;
 	}
 
-	public void handleInsert(String database, String collection,
+	public Result handleInsert(String database, String collection,
 			boolean continueOnError, Iterator<BSONObject> docs) {
 
 		MockDBCollection c = mongo.getOrCreateDB(database)
 				.getOrCreateCollection(collection);
+		int n = 0;
 		while (docs.hasNext()) {
 			c.insert(docs.next());
+			n++;
 		}
+		return new Result(n);
 
 	}
 
