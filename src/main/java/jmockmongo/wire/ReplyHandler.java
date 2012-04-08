@@ -28,6 +28,7 @@ import jmockmongo.Result;
 import jmockmongo.UpdateHandler;
 
 import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -95,11 +96,19 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 			}
 			if (queryHandler != null) {
-				BSONObject[] result = queryHandler.handleQuery(db[0], db[1],
-						query.getQuery());
-				e.getChannel().write(
-						ReplyMessage.reply((Message) e.getMessage(), 0, 0, 0,
-								result).getBytes());
+				try {
+					BSONObject[] result = queryHandler.handleQuery(db[0],
+							db[1], query.getQuery());
+					e.getChannel().write(
+							ReplyMessage.reply((Message) e.getMessage(), 0, 0,
+									0, result).getBytes());
+				} catch (Exception ex) {
+					e.getChannel().write(
+							ReplyMessage.reply((Message) e.getMessage(), 1, 0,
+									0,
+									new BasicBSONObject("$err", ex.toString()))
+									.getBytes());
+				}
 				return;
 			}
 

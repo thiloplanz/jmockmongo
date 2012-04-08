@@ -36,6 +36,8 @@ class DefaultQueryHandler implements QueryHandler {
 
 		MockDB db = mongo.getDB(database);
 		if (db != null) {
+			if (command.keySet().isEmpty())
+				return findAll(db, database, collection);
 			Object id = command.get("_id");
 			if (id == null || command.keySet().size() > 1)
 				throw new UnsupportedOperationException(
@@ -49,6 +51,14 @@ class DefaultQueryHandler implements QueryHandler {
 		}
 
 		return new BSONObject[0];
+	}
+
+	private BSONObject[] findAll(MockDB db, String database, String collection) {
+		MockDBCollection c = db.getCollection(collection);
+		if (c == null)
+			return new BSONObject[0];
+		return c.documents().toArray(new BSONObject[0]);
+
 	}
 
 }

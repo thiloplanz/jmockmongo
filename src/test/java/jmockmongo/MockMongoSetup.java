@@ -52,6 +52,19 @@ public abstract class MockMongoSetup extends TestCase {
 		return b;
 	}
 
+	protected void assertMockMongoDoesNotContainDocument(
+			String fullCollectionName, Object _id) {
+		MockDBCollection c = mongo.getCollection(fullCollectionName);
+		if (c == null)
+			return;
+
+		BSONObject b = c.findOne(_id);
+		if (b != null) {
+			fail("unexpected document " + _id + " was found in "
+					+ fullCollectionName);
+		}
+	}
+
 	protected void assertMockMongoFieldEquals(Object expected,
 			String fullCollectionName, Object _id, String field) {
 		BSONObject doc = assertMockMongoContainsDocument(fullCollectionName,

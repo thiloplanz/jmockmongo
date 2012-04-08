@@ -15,30 +15,41 @@
  * You should have received a copy of the License along with this program.
  * If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
  */
-
 package jmockmongo;
 
 import java.net.UnknownHostException;
 
-import com.mongodb.BasicDBObject;
+import org.bson.BasicBSONObject;
+
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 
-public class DefaultInsertHandlerTest extends MockMongoSetup {
+public class DefaultQueryHandlerTest extends MockMongoSetup {
 
-	public void testSimpleInsert() throws UnknownHostException, MongoException,
+	public void testFindOneById() throws UnknownHostException, MongoException,
 			InterruptedException {
 
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				"test"));
+
 		Mongo m = new Mongo();
-		WriteResult result = m.getDB("x").getCollection("x").insert(
-				WriteConcern.SAFE,
-				new BasicDBObject("_id", "x").append("field", "test"));
-
-		assertMockMongoFieldEquals("test", "x.x", "x", "field");
-
-		assertEquals(1, result.getN());
+		assertEquals("test", m.getDB("x").getCollection("x").findOne("x").get(
+				"field"));
+		m.close();
 
 	}
+
+	public void testFindAll() throws UnknownHostException, MongoException,
+			InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				"test"));
+
+		Mongo m = new Mongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
+				.getDB("x").getCollection("x").find().toArray().toString());
+		m.close();
+
+	}
+
 }

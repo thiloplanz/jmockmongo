@@ -19,6 +19,7 @@
 package jmockmongo;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -67,5 +68,9 @@ public class MockDBCollection {
 		Object id = b.get("_id");
 
 		data.put(fixForHash(id), b);
+	}
+
+	public Collection<BSONObject> documents() {
+		return data.values();
 	}
 }
