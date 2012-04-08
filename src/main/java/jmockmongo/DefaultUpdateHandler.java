@@ -36,18 +36,34 @@ class DefaultUpdateHandler implements UpdateHandler {
 			throw new UnsupportedOperationException(
 					"multiUpdate and upsert not implemented");
 
-		BSONObject $set = (BSONObject) update.get("$set");
-		if ($set == null || update.keySet().size() != 1) {
-			throw new UnsupportedOperationException(
-					"only $set is implemented, not " + update);
-		}
-
 		DefaultQueryHandler query = new DefaultQueryHandler(mongo);
 		BSONObject[] target = query.handleQuery(database, collection, selector);
 		if (target.length > 0) {
 			BSONObject t = target[0];
-			for (String k : $set.keySet()) {
-				t.put(k, $set.get(k));
+			for (String op : update.keySet()) {
+				if ("$set".equals(op)) {
+					BSONObject $set = (BSONObject) update.get("$set");
+					for (String k : $set.keySet()) {
+						t.put(k, $set.get(k));
+					}
+				} else if ("$addToSet".equals(op)) {
+					BSONObject $set = (BSONObject) update.get("$addToSet");
+					for (String k : $set.keySet()) {
+						Object x = $set.get(k);
+						if (x instanceof BSONObject) {
+							BSONObject b = (BSONObject) x;
+							if (b.containsField("$each")) {
+								for (Object each : BSONUtils.values(b, "$each"))
+									BSONUtils.addToSet(t, k, each);
+								continue;
+							}
+						}
+						BSONUtils.addToSet(t, k, x);
+					}
+				} else {
+					throw new UnsupportedOperationException(op
+							+ " is not implemented");
+				}
 			}
 			return new Result(1);
 		}

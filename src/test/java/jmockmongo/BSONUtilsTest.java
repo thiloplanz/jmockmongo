@@ -17,45 +17,26 @@
  */
 package jmockmongo;
 
+import junit.framework.TestCase;
+
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
-public class Result {
+public class BSONUtilsTest extends TestCase {
 
-	// ok - true indicates the getLastError command completed successfully. This
-	// does NOT indicate there wasn't a last error.
-	private final boolean ok;
+	public void testAddToSet() {
+		BSONObject b = new BasicBSONObject();
+		BSONUtils.addToSet(b, "set", "x");
+		assertEquals("{ \"set\" : [ \"x\"]}", b.toString());
+		BSONUtils.addToSet(b, "set", "x");
+		assertEquals("{ \"set\" : [ \"x\"]}", b.toString());
+		BSONUtils.addToSet(b, "set", 1);
+		assertEquals("{ \"set\" : [ \"x\" , 1]}", b.toString());
 
-	private final int n;
-
-	private final String error;
-
-	public Result(int n) {
-		ok = true;
-		this.n = n;
-		this.error = null;
-	}
-
-	public Result(String error) {
-		ok = true;
-		n = 0;
-		this.error = error;
-	}
-
-	public boolean isOk() {
-		return ok;
-	}
-
-	public int getN() {
-		return n;
-	}
-
-	public BSONObject toBSON() {
-		BasicBSONObject r = new BasicBSONObject("ok", ok ? 1 : 0)
-				.append("n", n);
-		if (error != null)
-			r.append("err", error);
-		return r;
+		BSONUtils.addToSet(b, "set", new byte[1]);
+		assertEquals("{ \"set\" : [ \"x\" , 1 , <Binary Data>]}", b.toString());
+		BSONUtils.addToSet(b, "set", new byte[1]);
+		assertEquals("{ \"set\" : [ \"x\" , 1 , <Binary Data>]}", b.toString());
 	}
 
 }

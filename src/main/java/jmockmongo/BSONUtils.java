@@ -18,6 +18,7 @@
 
 package jmockmongo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -228,41 +229,102 @@ class BSONUtils {
 				&& Arrays.equals(BSON.encode(a), BSON.encode(b));
 	}
 
+	static boolean equals(Object a, Object b) {
+		if (a == b)
+			return true;
+		if (a == null || b == null)
+			return false;
+		if (a instanceof BSONObject)
+			if (b instanceof BSONObject)
+				return equals((BSONObject) a, (BSONObject) b);
+			else
+				return false;
+		if (a instanceof byte[]) {
+			if (b instanceof byte[])
+				return Arrays.equals((byte[]) a, (byte[]) b);
+			else
+				return false;
+		}
+		return a.equals(b);
+	}
+
 	/**
 	 * @return true, if the field contains (in case of an array) or is equal to
-	 *         (in case of a single value) the given BSONObject
+	 *         (in case of a single value) the given Object
 	 */
-	static boolean contains(BSONObject b, String fieldName, BSONObject toLookFor) {
+	static boolean contains(BSONObject b, String fieldName, Object toLookFor) {
 		Object list = get(b, fieldName);
 		if (list == null)
 			return false;
 		if (list instanceof List<?>) {
 			for (Object o : (List<?>) list) {
-				if (o instanceof BSONObject) {
-					BSONObject x = (BSONObject) o;
-					if (equals(x, toLookFor))
-						return true;
-				}
+				if (equals(o, toLookFor))
+					return true;
+
 			}
 			return false;
 		}
 		if (list instanceof Object[]) {
 			for (Object o : (Object[]) list) {
-				if (o instanceof BSONObject) {
-					BSONObject x = (BSONObject) o;
-					if (equals(x, toLookFor))
-						return true;
-				}
+				if (equals(o, toLookFor))
+					return true;
+
 			}
 			return false;
 		}
-		if (list instanceof BSONObject) {
-			BSONObject x = (BSONObject) list;
-			if (equals(x, toLookFor))
-				return true;
+		return (equals(list, toLookFor));
+	}
+
+	/**
+	 * adds the element to the array, if it does not already exists there. Array
+	 * will be created if necessary. Single elements will be updated to arrays
+	 * is necessary.
+	 * 
+	 * Just adds one object (no "$each" processing)
+	 */
+
+	@SuppressWarnings("unchecked")
+	static void addToSet(BSONObject b, String fieldName, Object value) {
+		if (contains(b, fieldName, value))
+			return;
+
+		Object list = get(b, fieldName);
+		if (list == null) {
+			List<Object> l = new ArrayList<Object>();
+			l.add(value);
+			put(b, fieldName, l);
+			return;
 		}
-		return false;
+
+		if (list instanceof List<?>) {
+			((List) list).add(value);
+			return;
+		}
+		if (list instanceof Object[]) {
+			List<Object> l = new ArrayList<Object>();
+			for (Object x : (Object[]) list) {
+				l.add(x);
+			}
+			l.add(value);
+			put(b, fieldName, l);
+			return;
+		}
+		List<Object> l = new ArrayList<Object>();
+		l.add(list);
+		l.add(value);
+		put(b, fieldName, l);
+		return;
 
 	}
 
+	static Object[] values(BSONObject b, String fieldName) {
+		Object x = get(b, fieldName);
+		if (x == null)
+			return new Object[0];
+		if (x instanceof List<?>)
+			return ((List<?>) x).toArray();
+		if (x instanceof Object[])
+			return Arrays.copyOf((Object[]) x, ((Object[]) x).length);
+		return new Object[] { x };
+	}
 }

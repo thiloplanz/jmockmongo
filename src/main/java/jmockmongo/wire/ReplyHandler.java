@@ -29,6 +29,7 @@ import jmockmongo.UpdateHandler;
 
 import org.bson.BSONObject;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
@@ -127,5 +128,11 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 		throw new UnsupportedOperationException(request.toString());
 
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
+			throws Exception {
+		lastError = new Result(e.getCause().toString());
 	}
 }
