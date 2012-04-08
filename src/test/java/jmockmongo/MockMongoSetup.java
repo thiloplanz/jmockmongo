@@ -18,6 +18,8 @@
 
 package jmockmongo;
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 import org.bson.BSONObject;
@@ -55,6 +57,27 @@ public abstract class MockMongoSetup extends TestCase {
 		BSONObject doc = assertMockMongoContainsDocument(fullCollectionName,
 				_id);
 		assertEquals(expected, BSONUtils.get(doc, field));
+	}
+
+	protected void assertMockMongoFieldContains(Object expected,
+			String fullCollectionName, Object _id, String field) {
+		BSONObject doc = assertMockMongoContainsDocument(fullCollectionName,
+				_id);
+		if (!BSONUtils.contains(doc, field, expected))
+			fail("expected " + expected + " in " + field
+					+ ", but there was only "
+					+ Arrays.toString(BSONUtils.values(doc, field)));
+
+	}
+
+	protected void assertMockMongoFieldDoesNotContain(Object expected,
+			String fullCollectionName, Object _id, String field) {
+		BSONObject doc = assertMockMongoContainsDocument(fullCollectionName,
+				_id);
+		if (BSONUtils.contains(doc, field, expected))
+			fail("did not expect " + expected + " in " + field
+					+ ", but it was there");
+
 	}
 
 	protected void prepareMockData(String fullCollectionName, BSONObject data) {

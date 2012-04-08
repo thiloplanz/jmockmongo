@@ -23,7 +23,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
+
+import com.mongodb.DBRef;
 
 public class MockDBCollection {
 
@@ -39,12 +42,22 @@ public class MockDBCollection {
 		return name;
 	}
 
-	public BSONObject findOne(Object id) {
+	private Object fixForHash(Object id) {
 		// byte[] don't hash...
 		if (id instanceof byte[]) {
-			id = new BigInteger((byte[]) id);
+			return new BigInteger((byte[]) id);
 		}
-		return data.get(id);
+		// DBRef don't hash
+		if (id instanceof DBRef) {
+			return new BasicBSONObject("$ref", ((DBRef) id).getRef()).append(
+					"$id", ((DBRef) id).getId());
+		}
+		return id;
+	}
+
+	public BSONObject findOne(Object id) {
+
+		return data.get(fixForHash(id));
 	}
 
 	public void insert(BSONObject b) {
@@ -52,10 +65,7 @@ public class MockDBCollection {
 			b.put("_id", new ObjectId());
 		}
 		Object id = b.get("_id");
-		// byte[] don't hash...
-		if (id instanceof byte[]) {
-			id = new BigInteger((byte[]) id);
-		}
-		data.put(id, b);
+
+		data.put(fixForHash(id), b);
 	}
 }
