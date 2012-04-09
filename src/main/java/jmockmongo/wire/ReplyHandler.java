@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jmockmongo.CommandHandler;
+import jmockmongo.DeleteHandler;
 import jmockmongo.InsertHandler;
 import jmockmongo.QueryHandler;
 import jmockmongo.Result;
@@ -46,6 +47,8 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 	private UpdateHandler updateHandler;
 
+	private DeleteHandler deleteHandler;
+
 	public void setCommandHandler(String command, CommandHandler handler) {
 		commands.put(command, handler);
 	}
@@ -60,6 +63,10 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 
 	public void setUpdateHandler(UpdateHandler handler) {
 		updateHandler = handler;
+	}
+
+	public void setDeleteHandler(DeleteHandler handler) {
+		deleteHandler = handler;
 	}
 
 	@Override
@@ -135,6 +142,17 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 			}
 		}
 
+		if (request instanceof DeleteMessage) {
+			if (deleteHandler != null) {
+				DeleteMessage delete = (DeleteMessage) request;
+				String fc = delete.getFullCollectionName();
+				String[] db = fc.split("\\.", 2);
+				lastError = deleteHandler.handleDelete(db[0], db[1], true,
+						delete.getQuery());
+				return;
+			}
+		}
+
 		throw new UnsupportedOperationException(request.toString());
 
 	}
@@ -142,6 +160,7 @@ public class ReplyHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {
+		e.getCause().printStackTrace();
 		lastError = new Result(e.getCause().toString());
 	}
 }

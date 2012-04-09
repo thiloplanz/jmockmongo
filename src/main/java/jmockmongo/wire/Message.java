@@ -109,9 +109,12 @@ abstract class Message {
 			return new InsertMessage(buffer.readBytes(messageLength));
 		case UpdateMessage.OP_CODE_UPDATE:
 			return new UpdateMessage(buffer.readBytes(messageLength));
+		case DeleteMessage.OP_CODE_DELETE:
+			return new DeleteMessage(buffer.readBytes(messageLength));
 		default:
-			throw new IllegalArgumentException(String.format(
-					"message buffer has unsupported opcode (%d)", opCode));
+			String msg = String.format(
+					"message buffer has unsupported opcode (%d)", opCode);
+			throw new IllegalArgumentException(msg);
 
 		}
 	}

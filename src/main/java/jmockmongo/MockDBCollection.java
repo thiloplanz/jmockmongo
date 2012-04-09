@@ -73,4 +73,16 @@ public class MockDBCollection {
 	public Collection<BSONObject> documents() {
 		return data.values();
 	}
+
+	public void remove(BSONObject object) {
+		if (!object.containsField("_id"))
+			throw new UnsupportedOperationException(
+					"deletes without _id not yet implemented " + object);
+		if (object.keySet().size() > 1)
+			throw new UnsupportedOperationException(
+					"deletes with non primary key filter not yet implemented "
+							+ object);
+		Object id = fixForHash(object.get("_id"));
+		data.remove(id);
+	}
 }

@@ -109,6 +109,9 @@ public class MockMongo {
 				handler.setUpdateHandler(new DefaultUpdateHandler(
 						MockMongo.this));
 
+				handler.setDeleteHandler(new DefaultDeleteHandler(
+						MockMongo.this));
+
 				return Channels.pipeline(new SimpleChannelHandler() {
 
 					@Override
