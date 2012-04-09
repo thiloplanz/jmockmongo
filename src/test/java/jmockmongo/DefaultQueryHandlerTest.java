@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 
 import org.bson.BasicBSONObject;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -48,6 +49,46 @@ public class DefaultQueryHandlerTest extends MockMongoSetup {
 		Mongo m = new Mongo();
 		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
 				.getDB("x").getCollection("x").find().toArray().toString());
+		m.close();
+
+	}
+
+	public void testFindByField() throws UnknownHostException, MongoException,
+			InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				"test"));
+
+		Mongo m = new Mongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
+				.getDB("x").getCollection("x").find(
+						new BasicDBObject("field", "test")).toArray()
+				.toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", "not test")).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", "test")).toArray().toString());
+		m.close();
+
+	}
+
+	public void testFindByFieldAndId() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				"test"));
+
+		Mongo m = new Mongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
+				.getDB("x").getCollection("x").find(
+						new BasicDBObject("field", "test").append("_id", "x"))
+				.toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", "not test").append("_id", "x"))
+				.toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", "test").append("_id", "x"))
+				.toArray().toString());
 		m.close();
 
 	}

@@ -18,6 +18,11 @@
 
 package jmockmongo;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bson.BSONObject;
 
 class DefaultQueryHandler implements QueryHandler {
@@ -38,16 +43,66 @@ class DefaultQueryHandler implements QueryHandler {
 		if (db != null) {
 			if (command.keySet().isEmpty())
 				return findAll(db, database, collection);
-			Object id = command.get("_id");
-			if (id == null || command.keySet().size() > 1)
-				throw new UnsupportedOperationException(
-						"only _id queries are implemented, not " + command);
-			MockDBCollection c = db.getCollection(collection);
-			if (c != null) {
-				BSONObject result = c.findOne(id);
-				if (result != null)
-					return new BSONObject[] { result };
+			Object id = null;
+			Map<String, Object> equalityFilters = new HashMap<String, Object>();
+			for (String field : command.keySet()) {
+				if ("_id".equals(field)) {
+					id = command.get(field);
+					if (id instanceof BSONObject) {
+						for (String s : ((BSONObject) id).keySet()) {
+							if (s.equals("$ref") || s.equals("$id"))
+								continue;
+							if (s.startsWith("$"))
+								throw new UnsupportedOperationException(s
+										+ " queries are not implemented:"
+										+ command);
+						}
+					}
+				} else {
+					if (field.startsWith("$"))
+						throw new UnsupportedOperationException(field
+								+ " queries are not implemented:" + command);
+					if (field.contains("."))
+						throw new UnsupportedOperationException(
+								"nested field queries are not implemented: "
+										+ command);
+					Object value = command.get(field);
+					if (value instanceof String) {
+						equalityFilters.put(field, value);
+					} else
+						throw new UnsupportedOperationException(
+								"unsupported query for " + field + ": "
+										+ command);
+
+				}
 			}
+			BSONObject[] all = null;
+			if (id == null) {
+				all = findAll(db, database, collection);
+			} else {
+				MockDBCollection c = db.getCollection(collection);
+				if (c != null) {
+					BSONObject result = c.findOne(id);
+					if (result != null)
+						all = new BSONObject[] { result };
+				}
+			}
+			if (all != null && all.length > 0) {
+				if (equalityFilters.isEmpty())
+					return all;
+
+				List<BSONObject> result = new ArrayList<BSONObject>(all.length);
+				candidates: for (BSONObject x : all) {
+					for (Map.Entry<String, Object> e : equalityFilters
+							.entrySet()) {
+						if (!e.getValue().equals(x.get(e.getKey())))
+							continue candidates;
+					}
+					result.add(x);
+				}
+				return result.toArray(new BSONObject[0]);
+			}
+
 		}
 
 		return new BSONObject[0];
