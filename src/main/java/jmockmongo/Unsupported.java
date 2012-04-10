@@ -15,32 +15,38 @@
  * You should have received a copy of the License along with this program.
  * If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
  */
+package jmockmongo;
 
-package jmockmongo.commands;
-
-import jmockmongo.CommandHandler;
-import jmockmongo.DefaultQueryHandler;
-import jmockmongo.MockMongo;
-import jmockmongo.Unsupported;
+import java.util.Arrays;
 
 import org.bson.BSONObject;
-import org.bson.BasicBSONObject;
 
-public class Count implements CommandHandler {
+/**
+ * Collection of static helper methods to check for unsupported operations.
+ * 
+ */
 
-	private final MockMongo mongo;
+public final class Unsupported {
 
-	public Count(MockMongo mongo) {
-		this.mongo = mongo;
+	public static void supportedFields(BSONObject o, String... fields) {
+		f: for (String f : o.keySet()) {
+			for (String check : fields) {
+				if (check.equals(f))
+					continue f;
+			}
+			throw new UnsupportedOperationException("only "
+					+ Arrays.toString(fields) + " are supported: " + o);
+		}
 	}
 
-	public BSONObject handleCommand(String database, BSONObject command) {
-		Unsupported.supportedAndRequiredFields(command, "count", "query");
-		String collection = (String) command.get("count");
-		BSONObject query = (BSONObject) command.get("query");
-		int l = new DefaultQueryHandler(mongo).handleQuery(database,
-				collection, query).length;
-		return new BasicBSONObject("ok", 1).append("n", l);
+	public static void supportedAndRequiredFields(BSONObject o,
+			String... fields) {
+		for (String f : fields) {
+			if (!o.containsField(f))
+				throw new UnsupportedOperationException(
+						"missing required field '" + f + "': " + o);
+		}
+		supportedFields(o, fields);
 	}
 
 }

@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.bson.BSONObject;
 
-class DefaultQueryHandler implements QueryHandler {
+public class DefaultQueryHandler implements QueryHandler {
 
 	private final MockMongo mongo;;
 

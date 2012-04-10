@@ -15,32 +15,30 @@
  * You should have received a copy of the License along with this program.
  * If not, see <http://www.apache.org/licenses/LICENSE-2.0>.
  */
-
 package jmockmongo.commands;
 
-import jmockmongo.CommandHandler;
-import jmockmongo.DefaultQueryHandler;
-import jmockmongo.MockMongo;
-import jmockmongo.Unsupported;
+import java.net.UnknownHostException;
 
-import org.bson.BSONObject;
+import jmockmongo.MockMongoTestCaseSupport;
+
 import org.bson.BasicBSONObject;
 
-public class Count implements CommandHandler {
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
-	private final MockMongo mongo;
+public class CountTest extends MockMongoTestCaseSupport {
 
-	public Count(MockMongo mongo) {
-		this.mongo = mongo;
-	}
+	public void testFullCount() throws UnknownHostException, MongoException {
 
-	public BSONObject handleCommand(String database, BSONObject command) {
-		Unsupported.supportedAndRequiredFields(command, "count", "query");
-		String collection = (String) command.get("count");
-		BSONObject query = (BSONObject) command.get("query");
-		int l = new DefaultQueryHandler(mongo).handleQuery(database,
-				collection, query).length;
-		return new BasicBSONObject("ok", 1).append("n", l);
+		Mongo m = new Mongo();
+		assertEquals(0, m.getDB("x").getCollection("x").count());
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x"));
+		assertEquals(1, m.getDB("x").getCollection("x").count());
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "y"));
+		assertEquals(2, m.getDB("x").getCollection("x").count());
+
 	}
 
 }

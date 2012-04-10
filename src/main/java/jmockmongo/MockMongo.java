@@ -98,7 +98,7 @@ public class MockMongo {
 				final ReplyHandler handler = new ReplyHandler();
 				handler.setCommandHandler("isMaster", new IsMaster());
 				handler.setCommandHandler("listDatabases", new ListDatabases());
-				handler.setCommandHandler("count", new Count());
+				handler.setCommandHandler("count", new Count(MockMongo.this));
 
 				handler
 						.setQueryHandler(new DefaultQueryHandler(MockMongo.this));
