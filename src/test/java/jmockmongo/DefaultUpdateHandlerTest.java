@@ -27,7 +27,7 @@ import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 
-public class DefaultUpdateHandlerTest extends MockMongoSetup {
+public class DefaultUpdateHandlerTest extends MockMongoTestCaseSupport {
 
 	public void testUpdateNothing() throws UnknownHostException,
 			MongoException, InterruptedException {

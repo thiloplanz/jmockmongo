@@ -25,7 +25,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-public class DefaultQueryHandlerTest extends MockMongoSetup {
+public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 
 	public void testFindOneById() throws UnknownHostException, MongoException,
 			InterruptedException {

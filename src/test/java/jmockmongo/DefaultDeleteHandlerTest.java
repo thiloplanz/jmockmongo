@@ -27,7 +27,7 @@ import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 
-public class DefaultDeleteHandlerTest extends MockMongoSetup {
+public class DefaultDeleteHandlerTest extends MockMongoTestCaseSupport {
 
 	public void testDeleteNothing() throws UnknownHostException,
 			MongoException, InterruptedException {

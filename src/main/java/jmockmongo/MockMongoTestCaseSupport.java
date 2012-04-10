@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 
 import org.bson.BSONObject;
 
-public abstract class MockMongoSetup extends TestCase {
+public abstract class MockMongoTestCaseSupport extends TestCase {
 
 	private MockMongo mongo;
 
