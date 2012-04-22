@@ -18,10 +18,15 @@
 
 package jmockmongo;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import junit.framework.TestCase;
 
+import org.jboss.netty.channel.ChannelException;
+
+import com.mongodb.DBAddress;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -41,4 +46,19 @@ public class MockMongoTest extends TestCase {
 		}
 	}
 
+	public void testCannotBind() throws MongoException, InterruptedException,
+			IOException {
+
+		ServerSocket socket = new ServerSocket(DBAddress.defaultPort());
+		try {
+
+			MockMongo mongo = new MockMongo();
+			mongo.start();
+			fail("should have failed to start, because the server port is not available");
+		} catch (ChannelException e) {
+
+		} finally {
+			socket.close();
+		}
+	}
 }

@@ -18,11 +18,15 @@
 
 package jmockmongo;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
 
 import org.bson.BSONObject;
+
+import com.mongodb.DBPort;
+import com.mongodb.ServerAddress;
 
 public abstract class MockMongoTestCaseSupport extends TestCase {
 
@@ -30,13 +34,22 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+		// make sure we cannot connect before this
+		// (this would most likely mean a real server is running)
+		try {
+			new DBPort(new ServerAddress()).ensureOpen();
+			fail("something is already listening at the Mongo port! Is a real mongo processing running?");
+		} catch (IOException e) {
+		}
+
 		mongo = new MockMongo();
 		mongo.start();
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		mongo.stop();
+		if (mongo != null)
+			mongo.stop();
 	}
 
 	protected BSONObject assertMockMongoContainsDocument(

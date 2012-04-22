@@ -8,7 +8,7 @@ Only very few commands and queries are implemented. This is very much a work in 
 
 ## Example
 
-     // create a start a mock MongoDB
+     // create and start a mock MongoDB
      // it will be completely empty
      MockMongo mock = new MockMongo();
      mock.start();
