@@ -31,7 +31,7 @@ public class DefaultInsertHandlerTest extends MockMongoTestCaseSupport {
 	public void testSimpleInsert() throws UnknownHostException, MongoException,
 			InterruptedException {
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		WriteResult result = m.getDB("x").getCollection("x").insert(
 				WriteConcern.SAFE,
 				new BasicDBObject("_id", "x").append("field", "test"));

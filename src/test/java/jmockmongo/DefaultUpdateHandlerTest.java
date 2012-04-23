@@ -32,7 +32,7 @@ public class DefaultUpdateHandlerTest extends MockMongoTestCaseSupport {
 	public void testUpdateNothing() throws UnknownHostException,
 			MongoException, InterruptedException {
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		WriteResult result = m.getDB("x").getCollection("x").update(
 				new BasicDBObject("_id", "x"),
 				new BasicDBObject("$set", new BasicDBObject("field", "test")),
@@ -45,7 +45,7 @@ public class DefaultUpdateHandlerTest extends MockMongoTestCaseSupport {
 			InterruptedException {
 
 		prepareMockData("x.x", new BasicBSONObject("_id", "x"));
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		WriteResult result = m.getDB("x").getCollection("x").update(
 				new BasicDBObject("_id", "x"),
 				new BasicDBObject("$set", new BasicDBObject("field", "test")

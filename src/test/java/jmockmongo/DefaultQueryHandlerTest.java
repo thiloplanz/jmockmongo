@@ -33,7 +33,7 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
 				"test"));
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		assertEquals("test", m.getDB("x").getCollection("x").findOne("x").get(
 				"field"));
 		m.close();
@@ -46,7 +46,7 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
 				"test"));
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
 				.getDB("x").getCollection("x").find().toArray().toString());
 		m.close();
@@ -59,7 +59,7 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
 				"test"));
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
 				.getDB("x").getCollection("x").find(
 						new BasicDBObject("field", "test")).toArray()
@@ -78,7 +78,7 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
 				"test"));
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
 				.getDB("x").getCollection("x").find(
 						new BasicDBObject("field", "test").append("_id", "x"))

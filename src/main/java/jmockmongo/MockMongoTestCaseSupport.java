@@ -26,11 +26,14 @@ import junit.framework.TestCase;
 import org.bson.BSONObject;
 
 import com.mongodb.DBPort;
+import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
 
 public abstract class MockMongoTestCaseSupport extends TestCase {
 
-	private MockMongo mongo;
+	private MockMongo mockMongo;
+
+	private Mongo mongo;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -38,23 +41,30 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 		// (this would most likely mean a real server is running)
 		try {
 			new DBPort(new ServerAddress()).ensureOpen();
-			fail("something is already listening at the Mongo port! Is a real mongo processing running?");
+			fail("something is already listening at the Mongo port! Is a real mongo process running?");
 		} catch (IOException e) {
 		}
 
-		mongo = new MockMongo();
-		mongo.start();
+		mockMongo = new MockMongo();
+		mockMongo.start();
+		mongo = new Mongo("127.0.0.1", MockMongo.DEFAULT_PORT);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
+		if (mockMongo != null)
+			mockMongo.stop();
 		if (mongo != null)
-			mongo.stop();
+			mongo.close();
+	}
+
+	protected Mongo getMongo() {
+		return mongo;
 	}
 
 	protected BSONObject assertMockMongoContainsDocument(
 			String fullCollectionName, Object _id) {
-		MockDBCollection c = mongo.getCollection(fullCollectionName);
+		MockDBCollection c = mockMongo.getCollection(fullCollectionName);
 		if (c == null) {
 			fail("no collection " + fullCollectionName);
 		}
@@ -67,7 +77,7 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 
 	protected void assertMockMongoDoesNotContainDocument(
 			String fullCollectionName, Object _id) {
-		MockDBCollection c = mongo.getCollection(fullCollectionName);
+		MockDBCollection c = mockMongo.getCollection(fullCollectionName);
 		if (c == null)
 			return;
 
@@ -107,7 +117,8 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 	}
 
 	protected void prepareMockData(String fullCollectionName, BSONObject data) {
-		MockDBCollection c = mongo.getOrCreateCollection(fullCollectionName);
+		MockDBCollection c = mockMongo
+				.getOrCreateCollection(fullCollectionName);
 		c.insert(data);
 	}
 

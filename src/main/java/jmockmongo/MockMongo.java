@@ -41,9 +41,15 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import com.mongodb.DBAddress;
-
 public class MockMongo {
+
+	/**
+	 * the port JMockMongo listens to by default. This is different from the
+	 * real MongoDB default port to reduce the risk of accidentally connecting
+	 * test code to real databases.
+	 * 
+	 */
+	public static final int DEFAULT_PORT = 2307;
 
 	private ChannelGroup channels;
 
@@ -125,8 +131,7 @@ public class MockMongo {
 			}
 		});
 
-		channels.add(bootstrap.bind(new InetSocketAddress(DBAddress
-				.defaultPort())));
+		channels.add(bootstrap.bind(new InetSocketAddress(DEFAULT_PORT)));
 	}
 
 	public void stop() {

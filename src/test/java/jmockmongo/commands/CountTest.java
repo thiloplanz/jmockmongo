@@ -30,7 +30,7 @@ public class CountTest extends MockMongoTestCaseSupport {
 
 	public void testFullCount() throws UnknownHostException, MongoException {
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		assertEquals(0, m.getDB("x").getCollection("x").count());
 
 		prepareMockData("x.x", new BasicBSONObject("_id", "x"));

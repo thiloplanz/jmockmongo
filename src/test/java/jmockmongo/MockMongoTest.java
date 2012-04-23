@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 
 import org.jboss.netty.channel.ChannelException;
 
-import com.mongodb.DBAddress;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
@@ -37,10 +36,10 @@ public class MockMongoTest extends TestCase {
 
 		MockMongo mongo = new MockMongo();
 		mongo.start();
-		new Mongo().getDatabaseNames();
+		new Mongo("0.0.0.0", MockMongo.DEFAULT_PORT).getDatabaseNames();
 		mongo.stop();
 		try {
-			new Mongo().getDatabaseNames();
+			new Mongo("0.0.0.0", MockMongo.DEFAULT_PORT).getDatabaseNames();
 			fail("should have stopped");
 		} catch (MongoException e) {
 		}
@@ -49,7 +48,7 @@ public class MockMongoTest extends TestCase {
 	public void testCannotBind() throws MongoException, InterruptedException,
 			IOException {
 
-		ServerSocket socket = new ServerSocket(DBAddress.defaultPort());
+		ServerSocket socket = new ServerSocket(MockMongo.DEFAULT_PORT);
 		try {
 
 			MockMongo mongo = new MockMongo();

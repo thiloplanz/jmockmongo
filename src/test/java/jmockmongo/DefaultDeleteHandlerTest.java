@@ -32,7 +32,7 @@ public class DefaultDeleteHandlerTest extends MockMongoTestCaseSupport {
 	public void testDeleteNothing() throws UnknownHostException,
 			MongoException, InterruptedException {
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		WriteResult result = m.getDB("x").getCollection("x").remove(
 				new BasicDBObject("_id", "x"), WriteConcern.SAFE);
 		assertEquals(0, result.getN());
@@ -44,7 +44,7 @@ public class DefaultDeleteHandlerTest extends MockMongoTestCaseSupport {
 
 		prepareMockData("x.x", new BasicBSONObject("_id", "x"));
 
-		Mongo m = new Mongo();
+		Mongo m = getMongo();
 		WriteResult result = m.getDB("x").getCollection("x").remove(
 				new BasicDBObject("_id", "x"), WriteConcern.SAFE);
 		assertEquals(1, result.getN());
