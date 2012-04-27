@@ -44,7 +44,7 @@ public class DefaultQueryHandler implements QueryHandler {
 			if (command.keySet().isEmpty())
 				return findAll(db, database, collection);
 			Object id = null;
-			Map<String, Object> equalityFilters = new HashMap<String, Object>();
+			Map<String, Object[]> equalityFilters = new HashMap<String, Object[]>();
 			for (String field : command.keySet()) {
 				if ("_id".equals(field)) {
 					id = command.get(field);
@@ -68,7 +68,20 @@ public class DefaultQueryHandler implements QueryHandler {
 										+ command);
 					Object value = command.get(field);
 					if (value instanceof String) {
-						equalityFilters.put(field, value);
+						equalityFilters.put(field, new Object[] { value });
+					} else if (value instanceof BSONObject) {
+						BSONObject filters = (BSONObject) value;
+						for (String f : filters.keySet()) {
+							if ("$in".equals(f)) {
+								equalityFilters.put(field, Unsupported
+										.onlyStrings(BSONUtils.values(filters,
+												f)));
+							} else {
+								throw new UnsupportedOperationException(
+										"unsupported query " + f + " for "
+												+ field + ": " + filters);
+							}
+						}
 					} else
 						throw new UnsupportedOperationException(
 								"unsupported query for " + field + ": "
@@ -93,10 +106,14 @@ public class DefaultQueryHandler implements QueryHandler {
 
 				List<BSONObject> result = new ArrayList<BSONObject>(all.length);
 				candidates: for (BSONObject x : all) {
-					for (Map.Entry<String, Object> e : equalityFilters
+					equalities: for (Map.Entry<String, Object[]> e : equalityFilters
 							.entrySet()) {
-						if (!e.getValue().equals(x.get(e.getKey())))
-							continue candidates;
+						Object xx = x.get(e.getKey());
+						for (Object v : e.getValue()) {
+							if (v.equals(xx))
+								continue equalities;
+						}
+						continue candidates;
 					}
 					result.add(x);
 				}

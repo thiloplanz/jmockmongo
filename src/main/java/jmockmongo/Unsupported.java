@@ -49,4 +49,14 @@ public final class Unsupported {
 		supportedFields(o, fields);
 	}
 
+	public static Object[] onlyStrings(Object[] values) {
+		for (Object x : values) {
+			if (!(x instanceof String))
+				throw new UnsupportedOperationException(
+						"unsupported data type " + x.getClass().getName()
+								+ " in " + Arrays.toString(values));
+		}
+		return values;
+	}
+
 }
