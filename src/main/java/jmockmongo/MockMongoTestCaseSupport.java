@@ -38,16 +38,17 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		// make sure we cannot connect before this
-		// (this would most likely mean a real server is running)
+		// (this could mean a real server is running on our port)
 		try {
-			new DBPort(new ServerAddress()).ensureOpen();
+			new DBPort(new ServerAddress("0.0.0.0", MockMongo.DEFAULT_PORT))
+					.ensureOpen();
 			fail("something is already listening at the Mongo port! Is a real mongo process running?");
 		} catch (IOException e) {
 		}
 
 		mockMongo = new MockMongo();
 		mockMongo.start();
-		mongo = new Mongo("127.0.0.1", MockMongo.DEFAULT_PORT);
+		mongo = new Mongo(MockMongo.DEFAULT_URI);
 	}
 
 	@Override

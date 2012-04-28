@@ -26,7 +26,10 @@ So instead, jmockmongo now listens on port 2307.
      mock.start();
 
      // use the normal MongoDB client to talk to it
-     Mongo mongo = new Mongo("0.0.0.0", 2307);
+     Mongo mongo = 
+       new Mongo("0.0.0.0", 2307); 
+       // or new Mongo(MockMongo.DEFAULT_URI);
+  
      mongo.getDatabase("test").getCollection("test").insert(
        new BasicDBObject("x", 1));
      

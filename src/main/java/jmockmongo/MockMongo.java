@@ -41,6 +41,8 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
+import com.mongodb.MongoURI;
+
 public class MockMongo {
 
 	/**
@@ -50,6 +52,12 @@ public class MockMongo {
 	 * 
 	 */
 	public static final int DEFAULT_PORT = 2307;
+
+	/**
+	 * The MongoURI to connect to the default JMockMongo port (on localhost)
+	 */
+	public static final MongoURI DEFAULT_URI = new MongoURI(
+			"mongodb://0.0.0.0:" + DEFAULT_PORT);
 
 	private ChannelGroup channels;
 

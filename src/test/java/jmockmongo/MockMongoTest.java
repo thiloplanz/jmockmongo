@@ -36,10 +36,10 @@ public class MockMongoTest extends TestCase {
 
 		MockMongo mongo = new MockMongo();
 		mongo.start();
-		new Mongo("0.0.0.0", MockMongo.DEFAULT_PORT).getDatabaseNames();
+		new Mongo(MockMongo.DEFAULT_URI).getDatabaseNames();
 		mongo.stop();
 		try {
-			new Mongo("0.0.0.0", MockMongo.DEFAULT_PORT).getDatabaseNames();
+			new Mongo(MockMongo.DEFAULT_URI).getDatabaseNames();
 			fail("should have stopped");
 		} catch (MongoException e) {
 		}
