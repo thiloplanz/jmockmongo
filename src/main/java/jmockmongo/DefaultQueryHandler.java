@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.BSONObject;
+import org.bson.types.ObjectId;
 
 public class DefaultQueryHandler implements QueryHandler {
 
@@ -67,7 +68,7 @@ public class DefaultQueryHandler implements QueryHandler {
 								"nested field queries are not implemented: "
 										+ command);
 					Object value = command.get(field);
-					if (value instanceof String) {
+					if (value instanceof String || value instanceof ObjectId) {
 						equalityFilters.put(field, new Object[] { value });
 					} else if (value instanceof BSONObject) {
 						BSONObject filters = (BSONObject) value;
@@ -76,6 +77,7 @@ public class DefaultQueryHandler implements QueryHandler {
 								equalityFilters.put(field, Unsupported
 										.onlyStrings(BSONUtils.values(filters,
 												f)));
+
 							} else {
 								throw new UnsupportedOperationException(
 										"unsupported query " + f + " for "

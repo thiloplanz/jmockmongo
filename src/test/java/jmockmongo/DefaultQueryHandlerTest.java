@@ -20,6 +20,7 @@ package jmockmongo;
 import java.net.UnknownHostException;
 
 import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
@@ -36,7 +37,6 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		Mongo m = getMongo();
 		assertEquals("test", m.getDB("x").getCollection("x").findOne("x").get(
 				"field"));
-		m.close();
 
 	}
 
@@ -49,7 +49,6 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		Mongo m = getMongo();
 		assertEquals("[{ \"_id\" : \"x\" , \"field\" : \"test\"}]", m
 				.getDB("x").getCollection("x").find().toArray().toString());
-		m.close();
 
 	}
 
@@ -68,7 +67,6 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 				new BasicDBObject("field", "not test")).toArray().toString());
 		assertEquals("[]", m.getDB("x").getCollection("x").find(
 				new BasicDBObject("not field", "test")).toArray().toString());
-		m.close();
 
 	}
 
@@ -91,8 +89,26 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		assertEquals("[]", m.getDB("x").getCollection("x").find(
 				new BasicDBObject("not field", new BasicDBObject("$in",
 						new String[] { "test", "nope" }))).toArray().toString());
-		m.close();
 
+	}
+
+	public void testFindByField_$oid() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		ObjectId oid = new ObjectId("4fa213bc036483d83b01ad44");
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				oid));
+
+		Mongo m = getMongo();
+		assertEquals(
+				"[{ \"_id\" : \"x\" , \"field\" : { \"$oid\" : \"4fa213bc036483d83b01ad44\"}}]",
+				m.getDB("x").getCollection("x").find(
+						new BasicDBObject("field", oid)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", new ObjectId())).toArray()
+				.toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", oid)).toArray().toString());
 	}
 
 	public void testFindByFieldAndId() throws UnknownHostException,
@@ -112,7 +128,6 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 		assertEquals("[]", m.getDB("x").getCollection("x").find(
 				new BasicDBObject("not field", "test").append("_id", "x"))
 				.toArray().toString());
-		m.close();
 
 	}
 
