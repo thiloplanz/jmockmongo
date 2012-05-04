@@ -20,11 +20,11 @@ package jmockmongo;
 
 import org.bson.BSONObject;
 
-class DefaultUpdateHandler implements UpdateHandler {
+public class DefaultUpdateHandler implements UpdateHandler {
 
 	private final MockMongo mongo;
 
-	DefaultUpdateHandler(MockMongo mongo) {
+	public DefaultUpdateHandler(MockMongo mongo) {
 		this.mongo = mongo;
 	}
 

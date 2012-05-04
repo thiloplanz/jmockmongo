@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 import jmockmongo.commands.Count;
+import jmockmongo.commands.FindAndModify;
 import jmockmongo.commands.IsMaster;
 import jmockmongo.commands.ListDatabases;
 import jmockmongo.wire.LoggingHandler;
@@ -113,6 +114,8 @@ public class MockMongo {
 				handler.setCommandHandler("isMaster", new IsMaster());
 				handler.setCommandHandler("listDatabases", new ListDatabases());
 				handler.setCommandHandler("count", new Count(MockMongo.this));
+				handler.setCommandHandler("findandmodify", new FindAndModify(
+						MockMongo.this));
 
 				handler
 						.setQueryHandler(new DefaultQueryHandler(MockMongo.this));
