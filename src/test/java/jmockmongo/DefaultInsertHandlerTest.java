@@ -25,6 +25,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import com.mongodb.MongoException.DuplicateKey;
 
 public class DefaultInsertHandlerTest extends MockMongoTestCaseSupport {
 
@@ -39,6 +40,21 @@ public class DefaultInsertHandlerTest extends MockMongoTestCaseSupport {
 		assertMockMongoFieldEquals("test", "x.x", "x", "field");
 
 		assertEquals(1, result.getN());
+
+	}
+
+	public void testDuplicateId() {
+		Mongo m = getMongo();
+		m.getDB("x").getCollection("x").insert(WriteConcern.SAFE,
+				new BasicDBObject("_id", "x").append("field", "test"));
+		try {
+			m.getDB("x").getCollection("x").insert(WriteConcern.SAFE,
+					new BasicDBObject("_id", "x").append("field", "nope"));
+		} catch (DuplicateKey e) {
+			assertEquals(e.getMessage(), "E11000 duplicate key error");
+
+		}
+		assertMockMongoFieldEquals("test", "x.x", "x", "field");
 
 	}
 }

@@ -33,15 +33,22 @@ class DefaultInsertHandler implements InsertHandler {
 	public Result handleInsert(String database, String collection,
 			boolean continueOnError, Iterator<BSONObject> docs) {
 
+		if (continueOnError)
+			throw new UnsupportedOperationException(
+					"continueOnError not yet implemented");
+
 		MockDBCollection c = mongo.getOrCreateDB(database)
 				.getOrCreateCollection(collection);
-		int n = 0;
-		while (docs.hasNext()) {
-			c.insert(docs.next());
-			n++;
+		try {
+			int n = 0;
+			while (docs.hasNext()) {
+				c.insert(docs.next());
+				n++;
+			}
+			return new Result(n);
+		} catch (IllegalArgumentException e) {
+			return new Result("E11000 duplicate key error");
 		}
-		return new Result(n);
-
 	}
 
 }

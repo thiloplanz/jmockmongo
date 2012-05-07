@@ -20,8 +20,8 @@ package jmockmongo;
 
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
@@ -33,7 +33,7 @@ public class MockDBCollection {
 
 	private final String name;
 
-	private final Map<Object, BSONObject> data = new ConcurrentHashMap<Object, BSONObject>();
+	private final ConcurrentMap<Object, BSONObject> data = new ConcurrentHashMap<Object, BSONObject>();
 
 	MockDBCollection(String name) {
 		this.name = name;
@@ -67,7 +67,9 @@ public class MockDBCollection {
 		}
 		Object id = b.get("_id");
 
-		data.put(fixForHash(id), b);
+		if (data.putIfAbsent(fixForHash(id), b) != null) {
+			throw new IllegalArgumentException("duplicate _id");
+		}
 	}
 
 	public Collection<BSONObject> documents() {
