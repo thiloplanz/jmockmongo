@@ -26,7 +26,7 @@ public class MockDB {
 
 	private final ConcurrentHashMap<String, MockDBCollection> collections = new ConcurrentHashMap<String, MockDBCollection>();
 
-	MockDB(String name) {
+	public MockDB(String name) {
 		this.name = name;
 	}
 
@@ -46,6 +46,18 @@ public class MockDB {
 		collections.putIfAbsent(collectionName, new MockDBCollection(
 				collectionName));
 		return collections.get(collectionName);
+	}
+
+	public int countCollections() {
+		return collections.size();
+	}
+
+	public int countObjects() {
+		int x = 0;
+		for (MockDBCollection c : collections.values()) {
+			x += c.documentCount();
+		}
+		return x;
 	}
 
 }

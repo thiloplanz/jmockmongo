@@ -38,7 +38,7 @@ import org.bson.BSONObject;
  * 
  */
 
-class BSONUtils {
+public class BSONUtils {
 
 	private static <T> T notNull(T x) {
 		if (x == null)
@@ -134,7 +134,7 @@ class BSONUtils {
 		return toLong(get(b, fieldName));
 	}
 
-	static Integer getInteger(BSONObject b, String fieldName) {
+	public static Integer getInteger(BSONObject b, String fieldName) {
 		return toInteger(get(b, fieldName));
 	}
 

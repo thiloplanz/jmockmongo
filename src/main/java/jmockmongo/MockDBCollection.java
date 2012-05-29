@@ -76,6 +76,10 @@ public class MockDBCollection {
 		return data.values();
 	}
 
+	public int documentCount() {
+		return data.size();
+	}
+
 	public void remove(BSONObject object) {
 		if (!object.containsField("_id"))
 			throw new UnsupportedOperationException(
