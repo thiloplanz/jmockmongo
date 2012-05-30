@@ -69,6 +69,31 @@ If you are using JUnit, there is a helper TestCase base class that starts and st
       }
     }
 
+## Download 
+
+![Built on CloudBees](http://www.cloudbees.com/sites/default/files/Button-Built-on-CB-1.png) 
+
+
+You can download jmockmongo release builds from a Maven repository [powered by CloudBees](https://thiloplanz.ci.cloudbees.com/job/jmockmongo/):
+
+    <repositories>
+      <repository>
+		<id>thiloplanz</id>
+		<url>http://repository-thiloplanz.forge.cloudbees.com/release/</url>
+	  </repository>
+    </repositories>
+
+    <dependency>
+		<groupId>jmockmongo</groupId>
+		<artifactId>jmockmongo</artifactId>
+		<version>0.0.1</version>
+		<scope>test</scope>
+	</dependency>
+
+
+
+
+
 ## Prior Art
 
 If you want to mock-test your MongoDB code, you may also want to take a look around for other projects that might do a better job of it.
