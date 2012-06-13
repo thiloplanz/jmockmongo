@@ -20,6 +20,7 @@ package jmockmongo;
 import java.net.UnknownHostException;
 
 import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.Mongo;
@@ -57,4 +58,63 @@ public class DefaultUpdateHandlerTest extends MockMongoTestCaseSupport {
 
 	}
 
+	public void testReplacement() {
+
+		for (Object oid : new Object[] { "x", new ObjectId() }) {
+			prepareMockData("x.x", new BasicBSONObject("_id", oid).append(
+					"field", "old"));
+
+			Mongo m = getMongo();
+			{
+				WriteResult result = m.getDB("x").getCollection("x").update(
+						new BasicDBObject("_id", oid),
+						new BasicDBObject(new BasicDBObject("field", "test")
+								.append("another", "foo")), false, false,
+						WriteConcern.SAFE);
+				assertMockMongoFieldEquals("test", "x.x", oid, "field");
+				assertMockMongoFieldEquals("foo", "x.x", oid, "another");
+				assertEquals(1, result.getN());
+			}
+			{
+				WriteResult result = m.getDB("x").getCollection("x").update(
+						new BasicDBObject("_id", oid),
+						new BasicDBObject(new BasicDBObject("_id", oid)
+								.append("another", "three")), false, false,
+						WriteConcern.SAFE);
+				assertMockMongoFieldEquals(null, "x.x", oid, "field");
+				assertMockMongoFieldEquals("three", "x.x", oid, "another");
+				assertEquals(1, result.getN());
+			}
+
+		}
+	}
+
+	public void testCannotChangeId() {
+		prepareMockData("x.x", new BasicBSONObject("_id", "x"));
+
+		Mongo m = getMongo();
+		try {
+			m.getDB("x").getCollection("x").update(
+					new BasicDBObject("_id", "x"),
+					new BasicDBObject(new BasicDBObject("_id", "y")), false,
+					false, WriteConcern.SAFE);
+			fail();
+		} catch (MongoException e) {
+
+		}
+		assertMockMongoContainsDocument("x.x", "x");
+
+		try {
+			m.getDB("x").getCollection("x")
+					.update(
+							new BasicDBObject("_id", "x"),
+							new BasicDBObject("$set", new BasicDBObject("_id",
+									"test")), false, false, WriteConcern.SAFE);
+			fail();
+		} catch (MongoException e) {
+
+		}
+		assertMockMongoContainsDocument("x.x", "x");
+
+	}
 }

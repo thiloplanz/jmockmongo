@@ -19,6 +19,8 @@
 package jmockmongo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +42,24 @@ public class DefaultQueryHandler implements QueryHandler {
 		if ("system.indexes".equals(collection))
 			return new BSONObject[0];
 
+		// https://jira.mongodb.org/browse/SERVER-6078
+		BSONObject sort = null;
+		if (command.containsField("query")) {
+			Object q = command.get("query");
+			if (q instanceof BSONObject) {
+				BSONObject qq = (BSONObject) q;
+				Unsupported.supportedFields(command, "query", "orderby");
+				sort = BSONUtils.getObject(command, "orderby");
+				command = qq;
+				if (sort != null && sort.keySet().isEmpty())
+					sort = null;
+			}
+		}
+
 		MockDB db = mongo.getDB(database);
 		if (db != null) {
 			if (command.keySet().isEmpty())
-				return findAll(db, database, collection);
+				return findAll(db, database, collection, sort);
 			Object id = null;
 			Map<String, Object[]> equalityFilters = new HashMap<String, Object[]>();
 			for (String field : command.keySet()) {
@@ -68,7 +84,9 @@ public class DefaultQueryHandler implements QueryHandler {
 								"nested field queries are not implemented: "
 										+ command);
 					Object value = command.get(field);
-					if (value instanceof String || value instanceof ObjectId || value instanceof Long || value instanceof Integer) {
+					if (value instanceof String || value instanceof ObjectId
+							|| value instanceof Long
+							|| value instanceof Integer) {
 						equalityFilters.put(field, new Object[] { value });
 					} else if (value instanceof BSONObject) {
 						BSONObject filters = (BSONObject) value;
@@ -93,7 +111,7 @@ public class DefaultQueryHandler implements QueryHandler {
 			}
 			BSONObject[] all = null;
 			if (id == null) {
-				all = findAll(db, database, collection);
+				all = findAll(db, database, collection, sort);
 			} else {
 				MockDBCollection c = db.getCollection(collection);
 				if (c != null) {
@@ -127,12 +145,42 @@ public class DefaultQueryHandler implements QueryHandler {
 		return new BSONObject[0];
 	}
 
-	private BSONObject[] findAll(MockDB db, String database, String collection) {
+	private BSONObject[] findAll(MockDB db, String database, String collection, BSONObject sort) {
+		if (sort != null && sort.keySet().size() > 1)
+			throw new UnsupportedOperationException("multi-key sorting not yet implemented");
+
+		
 		MockDBCollection c = db.getCollection(collection);
 		if (c == null)
 			return new BSONObject[0];
-		return c.documents().toArray(new BSONObject[0]);
+		BSONObject[] all =  c.documents().toArray(new BSONObject[0]);
+		if (sort == null || all.length == 1)
+			return all;
+		
+		final String sortField = sort.keySet().iterator().next();
+		Object a = sort.get(sortField);
+		if (a instanceof Boolean)
+			a = a;
+		else if (a.equals(1))
+			a = true;
+		else if (a.equals(-1))
+			a = false;
+		else throw new IllegalArgumentException("sort order for "+sortField+" should be 1 or -1, not "+a);
+		
+		final boolean asc = (Boolean)a;
+		
+		final Comparator<Object> comp = new BSONComparator();
+		
+		Arrays.sort(all, new Comparator<BSONObject>(){
+
+			public int compare(BSONObject arg0, BSONObject arg1) {
+				int r = comp.compare(arg0.get(sortField), arg1.get(sortField));
+				return asc ? r : -r;
+			}
+			
+		});
+		
+		return all;
 
 	}
-
 }

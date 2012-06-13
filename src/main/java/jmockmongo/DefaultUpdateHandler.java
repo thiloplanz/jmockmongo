@@ -19,6 +19,7 @@
 package jmockmongo;
 
 import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 
 public class DefaultUpdateHandler implements UpdateHandler {
 
@@ -40,32 +41,70 @@ public class DefaultUpdateHandler implements UpdateHandler {
 		BSONObject[] target = query.handleQuery(database, collection, selector);
 		if (target.length > 0) {
 			BSONObject t = target[0];
+			final Object _id = t.get("_id");
+			boolean hasModifier = false;
 			for (String op : update.keySet()) {
-				if ("$set".equals(op)) {
-					BSONObject $set = (BSONObject) update.get("$set");
-					for (String k : $set.keySet()) {
-						t.put(k, $set.get(k));
-					}
-				} else if ("$addToSet".equals(op)) {
-					BSONObject $set = (BSONObject) update.get("$addToSet");
-					for (String k : $set.keySet()) {
-						Object x = $set.get(k);
-						if (x instanceof BSONObject) {
-							BSONObject b = (BSONObject) x;
-							if (b.containsField("$each")) {
-								for (Object each : BSONUtils.values(b, "$each"))
-									BSONUtils.addToSet(t, k, each);
-								continue;
-							}
-						}
-						BSONUtils.addToSet(t, k, x);
-					}
-				} else {
-					throw new UnsupportedOperationException(op
-							+ " is not implemented");
+				if (op.startsWith("$")) {
+					hasModifier = true;
+					break;
 				}
+				// "." is not supported
+				if (op.contains("."))
+					throw new UnsupportedOperationException(
+							"nested fields not implemented");
 			}
+
+			if (hasModifier) {
+				for (String op : update.keySet()) {
+					if ("$set".equals(op)) {
+						BSONObject $set = (BSONObject) update.get("$set");
+						for (String k : $set.keySet()) {
+							// if _id is present, it must match
+							if ("_id".equals(k))
+								if (!_id.equals($set.get(k)))
+									throw new UnsupportedOperationException(
+											"cannot change _id of a document");
+
+							// "." is not supported
+							if (op.contains("."))
+								throw new UnsupportedOperationException(
+										"nested fields not implemented");
+							t.put(k, $set.get(k));
+						}
+					} else if ("$addToSet".equals(op)) {
+						BSONObject $set = (BSONObject) update.get("$addToSet");
+						for (String k : $set.keySet()) {
+							Object x = $set.get(k);
+							if (x instanceof BSONObject) {
+								BSONObject b = (BSONObject) x;
+								if (b.containsField("$each")) {
+									for (Object each : BSONUtils.values(b,
+											"$each"))
+										BSONUtils.addToSet(t, k, each);
+									continue;
+								}
+							}
+							BSONUtils.addToSet(t, k, x);
+						}
+					} else {
+						throw new UnsupportedOperationException(op
+								+ " is not implemented " + update);
+					}
+				}
+				return new Result(1);
+			}
+
+			// if _id is present, it must match
+			if (update.containsField("_id")) {
+				if (!_id.equals(update.get("_id")))
+					throw new UnsupportedOperationException(
+							"cannot change _id of a document");
+			}
+			update.put("_id", _id);
+			t.keySet().clear();
+			t.putAll(update);
 			return new Result(1);
+
 		}
 
 		return new Result(0);
