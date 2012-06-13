@@ -68,7 +68,7 @@ public class DefaultQueryHandler implements QueryHandler {
 								"nested field queries are not implemented: "
 										+ command);
 					Object value = command.get(field);
-					if (value instanceof String || value instanceof ObjectId) {
+					if (value instanceof String || value instanceof ObjectId || value instanceof Long || value instanceof Integer) {
 						equalityFilters.put(field, new Object[] { value });
 					} else if (value instanceof BSONObject) {
 						BSONObject filters = (BSONObject) value;

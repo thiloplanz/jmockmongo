@@ -111,6 +111,40 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 				new BasicDBObject("not field", oid)).toArray().toString());
 	}
 
+	public void testFindByField_Integer() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				1));
+
+		Mongo m = getMongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : 1}]", m
+				.getDB("x").getCollection("x").find(
+						new BasicDBObject("field", 1)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", 2)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", 1)).toArray().toString());
+	}
+
+	public void testFindByField_Long() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				1l));
+
+		Mongo m = getMongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : 1}]", m
+				.getDB("x").getCollection("x").find(
+						new BasicDBObject("field", 1l)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", 1)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", 2l)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", 1l)).toArray().toString());
+	}
+
 	public void testFindByFieldAndId() throws UnknownHostException,
 			MongoException, InterruptedException {
 
