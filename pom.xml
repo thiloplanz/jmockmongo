@@ -13,8 +13,8 @@
 	</licenses>
 	<inceptionYear>2012</inceptionYear>
 	<properties>
-    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -26,16 +26,24 @@
 					<target>6</target>
 				</configuration>
 			</plugin>
-			<!-- 
 			<plugin>
-				<groupId>com.mycila.maven-license-plugin</groupId>
-				<artifactId>maven-license-plugin</artifactId>
-				<configuration>
-					<basedir>${basedir}/src</basedir>
-					<header>${basedir}/src/license_header_apachev2.txt</header>
-					<strictCheck>true</strictCheck>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
+			<!--
+				<plugin> <groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId> <configuration>
+				<basedir>${basedir}/src</basedir>
+				<header>${basedir}/src/license_header_apachev2.txt</header>
+				<strictCheck>true</strictCheck> </configuration> </plugin>
 			-->
 
 		</plugins>
