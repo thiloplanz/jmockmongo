@@ -20,10 +20,13 @@ package jmockmongo;
 import java.util.Comparator;
 
 import org.bson.BSON;
+import org.bson.BSONObject;
 import org.bson.types.ObjectId;
 
 class BSONComparator implements Comparator<Object> {
 
+	static final BSONComparator INSTANCE = new BSONComparator();
+	
 	@SuppressWarnings("unchecked")
 	public int compare(Object o1, Object o2) {
 		if (o1 == o2)
@@ -34,7 +37,8 @@ class BSONComparator implements Comparator<Object> {
 			return t1-t2;
 		if (o1 instanceof Integer || o1 instanceof String || o1 instanceof Number || o1 instanceof ObjectId )
 			return ((Comparable)o1).compareTo(o2);
-		throw new IllegalArgumentException(o1.getClass().getName());
+		
+		throw new IllegalArgumentException("cannot compare "+ o1.getClass().getName());
 	}
 
 	
@@ -49,7 +53,8 @@ class BSONComparator implements Comparator<Object> {
 			return BSON.NUMBER_LONG;
 		if (x instanceof ObjectId)
 			return BSON.OID;
-		
+		if (x instanceof BSONObject)
+			return BSON.OBJECT;
 		throw new IllegalArgumentException(x.getClass().getName());
 	}
 }

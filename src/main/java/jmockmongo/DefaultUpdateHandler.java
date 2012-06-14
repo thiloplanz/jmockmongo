@@ -19,7 +19,6 @@
 package jmockmongo;
 
 import org.bson.BSONObject;
-import org.bson.BasicBSONObject;
 
 public class DefaultUpdateHandler implements UpdateHandler {
 

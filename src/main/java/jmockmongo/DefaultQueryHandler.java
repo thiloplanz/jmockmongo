@@ -61,15 +61,24 @@ public class DefaultQueryHandler implements QueryHandler {
 			if (command.keySet().isEmpty())
 				return findAll(db, database, collection, sort);
 			Object id = null;
-			Map<String, Object[]> equalityFilters = new HashMap<String, Object[]>();
+			Map<String, QueryPredicate> filters = new HashMap<String, QueryPredicate>();
 			for (String field : command.keySet()) {
 				if ("_id".equals(field)) {
 					id = command.get(field);
 					if (id instanceof BSONObject) {
-						for (String s : ((BSONObject) id).keySet()) {
+						BSONObject options = (BSONObject) id;
+						for (String s : options.keySet()) {
 							if (s.equals("$ref") || s.equals("$id"))
 								continue;
-							if (s.startsWith("$"))
+							if ("$gt".equals(s)) {
+								filters.put(field, new GreaterThan(
+										options.get(s)));
+								id = null;
+							} else if ("$lt".equals(s)) {
+								filters.put(field, new LowerThan(
+										options.get(s)));
+								id = null;
+							} else if (s.startsWith("$"))
 								throw new UnsupportedOperationException(s
 										+ " queries are not implemented:"
 										+ command);
@@ -87,19 +96,29 @@ public class DefaultQueryHandler implements QueryHandler {
 					if (value instanceof String || value instanceof ObjectId
 							|| value instanceof Long
 							|| value instanceof Integer) {
-						equalityFilters.put(field, new Object[] { value });
+						filters
+								.put(field,
+										new Equality(new Object[] { value }));
 					} else if (value instanceof BSONObject) {
-						BSONObject filters = (BSONObject) value;
-						for (String f : filters.keySet()) {
+						BSONObject options = (BSONObject) value;
+						if (options.keySet().size() > 1)
+							throw new UnsupportedOperationException(
+									"at most one query operator supported for "
+											+ field + " " + options);
+						for (String f : options.keySet()) {
 							if ("$in".equals(f)) {
-								equalityFilters.put(field, Unsupported
-										.onlyStrings(BSONUtils.values(filters,
-												f)));
-
+								filters.put(field, new Equality(BSONUtils
+										.values(options, f)));
+							} else if ("$gt".equals(f)) {
+								filters.put(field, new GreaterThan(options
+										.get(f)));
+							} else if ("$lt".equals(f)) {
+								filters.put(field, new LowerThan(options
+										.get(f)));
 							} else {
 								throw new UnsupportedOperationException(
 										"unsupported query " + f + " for "
-												+ field + ": " + filters);
+												+ field + ": " + options);
 							}
 						}
 					} else
@@ -121,19 +140,17 @@ public class DefaultQueryHandler implements QueryHandler {
 				}
 			}
 			if (all != null && all.length > 0) {
-				if (equalityFilters.isEmpty())
+				if (filters.isEmpty())
 					return all;
 
 				List<BSONObject> result = new ArrayList<BSONObject>(all.length);
 				candidates: for (BSONObject x : all) {
-					equalities: for (Map.Entry<String, Object[]> e : equalityFilters
+					for (Map.Entry<String, QueryPredicate> e : filters
 							.entrySet()) {
 						Object xx = x.get(e.getKey());
-						for (Object v : e.getValue()) {
-							if (v.equals(xx))
-								continue equalities;
-						}
-						continue candidates;
+						if (!e.getValue().test(xx))
+							continue candidates;
+
 					}
 					result.add(x);
 				}
@@ -145,41 +162,43 @@ public class DefaultQueryHandler implements QueryHandler {
 		return new BSONObject[0];
 	}
 
-	private BSONObject[] findAll(MockDB db, String database, String collection, BSONObject sort) {
+	private BSONObject[] findAll(MockDB db, String database, String collection,
+			BSONObject sort) {
 		if (sort != null && sort.keySet().size() > 1)
-			throw new UnsupportedOperationException("multi-key sorting not yet implemented");
+			throw new UnsupportedOperationException(
+					"multi-key sorting not yet implemented");
 
-		
 		MockDBCollection c = db.getCollection(collection);
 		if (c == null)
 			return new BSONObject[0];
-		BSONObject[] all =  c.documents().toArray(new BSONObject[0]);
+		BSONObject[] all = c.documents().toArray(new BSONObject[0]);
 		if (sort == null || all.length == 1)
 			return all;
-		
+
 		final String sortField = sort.keySet().iterator().next();
 		Object a = sort.get(sortField);
 		if (a instanceof Boolean)
-			a = a;
+			;
 		else if (a.equals(1))
 			a = true;
 		else if (a.equals(-1))
 			a = false;
-		else throw new IllegalArgumentException("sort order for "+sortField+" should be 1 or -1, not "+a);
-		
-		final boolean asc = (Boolean)a;
-		
-		final Comparator<Object> comp = new BSONComparator();
-		
-		Arrays.sort(all, new Comparator<BSONObject>(){
+		else
+			throw new IllegalArgumentException("sort order for " + sortField
+					+ " should be 1 or -1, not " + a);
+
+		final boolean asc = (Boolean) a;
+
+		Arrays.sort(all, new Comparator<BSONObject>() {
 
 			public int compare(BSONObject arg0, BSONObject arg1) {
-				int r = comp.compare(arg0.get(sortField), arg1.get(sortField));
+				int r = BSONComparator.INSTANCE.compare(arg0.get(sortField),
+						arg1.get(sortField));
 				return asc ? r : -r;
 			}
-			
+
 		});
-		
+
 		return all;
 
 	}
