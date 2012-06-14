@@ -17,7 +17,9 @@
  */
 package jmockmongo;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.bson.BSON;
 import org.bson.BSONObject;
@@ -37,7 +39,31 @@ class BSONComparator implements Comparator<Object> {
 			return t1-t2;
 		if (o1 instanceof Integer || o1 instanceof String || o1 instanceof Number || o1 instanceof ObjectId )
 			return ((Comparable)o1).compareTo(o2);
-		
+		if (o1 instanceof BSONObject){
+			// compare key-value-key-value-... in order
+			BSONObject b1 = (BSONObject) o1;
+			BSONObject b2 = (BSONObject) o2;
+			List<String> keys1 = new ArrayList<String>(b1.keySet());
+			List<String> keys2 = new ArrayList<String>(b2.keySet());
+			int m = Math.min(keys1.size(), keys2.size());
+			for (int i=0; i<m; i++){
+				// key
+				String k1 = keys1.get(i);
+				String k2 = keys2.get(i);
+				int c = k1.compareTo(k2);
+				if (c != 0)
+					return c;
+				// value
+				c = compare(b1.get(k1), b2.get(k2));
+				if (c != 0)
+					return c;
+			}
+			if (keys1.size() == keys2.size())
+				return 0;
+			if (keys1.size() > keys2.size())
+				return 1;
+			return -1;
+		}
 		throw new IllegalArgumentException("cannot compare "+ o1.getClass().getName());
 	}
 
@@ -55,6 +81,8 @@ class BSONComparator implements Comparator<Object> {
 			return BSON.OID;
 		if (x instanceof BSONObject)
 			return BSON.OBJECT;
+		if (x instanceof Double)
+			return BSON.NUMBER;
 		throw new IllegalArgumentException(x.getClass().getName());
 	}
 }

@@ -219,20 +219,38 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 				"x"));
 		{
 			List<DBObject> result = getMongo().getDB("x").getCollection("x")
-					.find(new BasicDBObject("field", new BasicDBObject("$gt", 9))).toArray();
+					.find(
+							new BasicDBObject("field", new BasicDBObject("$gt",
+									9))).toArray();
 			assertEquals("x", result.get(0).get("_id"));
 			assertEquals(1, result.size());
 		}
 		{
 			List<DBObject> result = getMongo().getDB("x").getCollection("x")
-					.find(new BasicDBObject("_id", new BasicDBObject("$gt", "y"))).toArray();
+					.find(
+							new BasicDBObject("_id", new BasicDBObject("$gt",
+									"y"))).toArray();
 			assertEquals(1, result.get(0).get("_id"));
 			assertEquals(1, result.size());
 		}
+
+		prepareMockData("x.x", new BasicBSONObject("_id", new BasicBSONObject(
+				"_id", 1).append("x", 1)).append("field", "complex"));
+		prepareMockData("x.x", new BasicBSONObject("_id", new BasicBSONObject(
+				"_id", 1).append("x", 2)).append("field", "complex"));
 		
+		{
+			List<DBObject> result = getMongo().getDB("x").getCollection("x")
+					.find(
+							new BasicDBObject("_id", new BasicDBObject("$gt",
+									new BasicBSONObject(
+											"_id", 1).append("x", 1))).append("field", "complex")).toArray();
+			assertEquals("{ \"_id\" : 1 , \"x\" : 2}", result.get(0).get("_id").toString());
+			assertEquals(1, result.size());
+		}
 
 	}
-	
+
 	public void test$lt() {
 
 		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
@@ -243,17 +261,36 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 				"x"));
 		{
 			List<DBObject> result = getMongo().getDB("x").getCollection("x")
-					.find(new BasicDBObject("field", new BasicDBObject("$lt", 9))).toArray();
+					.find(
+							new BasicDBObject("field", new BasicDBObject("$lt",
+									9))).toArray();
 			assertEquals(1, result.get(0).get("_id"));
 			assertEquals(1, result.size());
 		}
 		{
 			List<DBObject> result = getMongo().getDB("x").getCollection("x")
-					.find(new BasicDBObject("_id", new BasicDBObject("$lt", "y"))).toArray();
+					.find(
+							new BasicDBObject("_id", new BasicDBObject("$lt",
+									"y"))).toArray();
 			assertEquals("x", result.get(0).get("_id"));
 			assertEquals(1, result.size());
 		}
+
 		
+		prepareMockData("x.x", new BasicBSONObject("_id", new BasicBSONObject(
+				"_id", 1).append("x", 1)).append("field", "complex"));
+		prepareMockData("x.x", new BasicBSONObject("_id", new BasicBSONObject(
+				"_id", 1).append("x", 2)).append("field", "complex"));
+		
+		{
+			List<DBObject> result = getMongo().getDB("x").getCollection("x")
+					.find(
+							new BasicDBObject("_id", new BasicDBObject("$lt",
+									new BasicBSONObject(
+											"_id", 1).append("x", 2))).append("field", "complex")).toArray();
+			assertEquals("{ \"_id\" : 1 , \"x\" : 1}", result.get(0).get("_id").toString());
+			assertEquals(1, result.size());
+		}
 
 	}
 

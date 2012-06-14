@@ -28,6 +28,8 @@ import java.util.Map;
 import org.bson.BSONObject;
 import org.bson.types.ObjectId;
 
+import com.mongodb.QueryOperators;
+
 public class DefaultQueryHandler implements QueryHandler {
 
 	private final MockMongo mongo;;
@@ -67,14 +69,15 @@ public class DefaultQueryHandler implements QueryHandler {
 					id = command.get(field);
 					if (id instanceof BSONObject) {
 						BSONObject options = (BSONObject) id;
+						
 						for (String s : options.keySet()) {
 							if (s.equals("$ref") || s.equals("$id"))
 								continue;
-							if ("$gt".equals(s)) {
+							if (QueryOperators.GT.equals(s)) {
 								filters.put(field, new GreaterThan(
 										options.get(s)));
 								id = null;
-							} else if ("$lt".equals(s)) {
+							} else if (QueryOperators.LT.equals(s)) {
 								filters.put(field, new LowerThan(
 										options.get(s)));
 								id = null;
@@ -83,6 +86,11 @@ public class DefaultQueryHandler implements QueryHandler {
 										+ " queries are not implemented:"
 										+ command);
 						}
+						
+						if (id == null && options.keySet().size() > 1)
+							throw new UnsupportedOperationException(
+									"at most one query operator supported for "
+											+ field + " " + options);
 					}
 				} else {
 					if (field.startsWith("$"))
@@ -109,10 +117,10 @@ public class DefaultQueryHandler implements QueryHandler {
 							if ("$in".equals(f)) {
 								filters.put(field, new Equality(BSONUtils
 										.values(options, f)));
-							} else if ("$gt".equals(f)) {
+							} else if (QueryOperators.GT.equals(f)) {
 								filters.put(field, new GreaterThan(options
 										.get(f)));
-							} else if ("$lt".equals(f)) {
+							} else if (QueryOperators.LT.equals(f)) {
 								filters.put(field, new LowerThan(options
 										.get(f)));
 							} else {
