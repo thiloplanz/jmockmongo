@@ -294,4 +294,28 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 
 	}
 
+	public void test$gt$lt() {
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				10));
+		prepareMockData("x.x", new BasicBSONObject("_id", "y").append("field",
+				9));
+		prepareMockData("x.x", new BasicBSONObject("_id", 1).append("field",
+				"x"));
+		{
+			List<DBObject> result = getMongo().getDB("x").getCollection("x")
+					.find(
+							new BasicDBObject("field", new BasicDBObject("$lt",
+									10).append("$gt", "x"))).toArray();
+			assertEquals("y", result.get(0).get("_id"));
+			assertEquals(1, result.size());
+		}
+		{
+			List<DBObject> result = getMongo().getDB("x").getCollection("x")
+					.find(
+							new BasicDBObject("_id", new BasicDBObject("$lt",
+									1).append("$gt", "x"))).toArray();
+			assertEquals("y", result.get(0).get("_id"));
+			assertEquals(1, result.size());
+		}
+	}
 }

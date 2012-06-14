@@ -63,34 +63,30 @@ public class DefaultQueryHandler implements QueryHandler {
 			if (command.keySet().isEmpty())
 				return findAll(db, database, collection, sort);
 			Object id = null;
-			Map<String, QueryPredicate> filters = new HashMap<String, QueryPredicate>();
+			Map<String, List<QueryPredicate>> filters = new HashMap<String, List<QueryPredicate>>();
 			for (String field : command.keySet()) {
 				if ("_id".equals(field)) {
 					id = command.get(field);
 					if (id instanceof BSONObject) {
 						BSONObject options = (BSONObject) id;
-						
+
 						for (String s : options.keySet()) {
 							if (s.equals("$ref") || s.equals("$id"))
 								continue;
 							if (QueryOperators.GT.equals(s)) {
-								filters.put(field, new GreaterThan(
+								multiPut(filters, field, new GreaterThan(
 										options.get(s)));
 								id = null;
 							} else if (QueryOperators.LT.equals(s)) {
-								filters.put(field, new LowerThan(
-										options.get(s)));
+								multiPut(filters, field, new LowerThan(options
+										.get(s)));
 								id = null;
 							} else if (s.startsWith("$"))
 								throw new UnsupportedOperationException(s
 										+ " queries are not implemented:"
 										+ command);
 						}
-						
-						if (id == null && options.keySet().size() > 1)
-							throw new UnsupportedOperationException(
-									"at most one query operator supported for "
-											+ field + " " + options);
+
 					}
 				} else {
 					if (field.startsWith("$"))
@@ -104,24 +100,19 @@ public class DefaultQueryHandler implements QueryHandler {
 					if (value instanceof String || value instanceof ObjectId
 							|| value instanceof Long
 							|| value instanceof Integer) {
-						filters
-								.put(field,
-										new Equality(new Object[] { value }));
+						multiPut(filters, field, new Equality(
+								new Object[] { value }));
 					} else if (value instanceof BSONObject) {
 						BSONObject options = (BSONObject) value;
-						if (options.keySet().size() > 1)
-							throw new UnsupportedOperationException(
-									"at most one query operator supported for "
-											+ field + " " + options);
 						for (String f : options.keySet()) {
 							if ("$in".equals(f)) {
-								filters.put(field, new Equality(BSONUtils
+								multiPut(filters, field, new Equality(BSONUtils
 										.values(options, f)));
 							} else if (QueryOperators.GT.equals(f)) {
-								filters.put(field, new GreaterThan(options
-										.get(f)));
+								multiPut(filters, field, new GreaterThan(
+										options.get(f)));
 							} else if (QueryOperators.LT.equals(f)) {
-								filters.put(field, new LowerThan(options
+								multiPut(filters, field, new LowerThan(options
 										.get(f)));
 							} else {
 								throw new UnsupportedOperationException(
@@ -153,11 +144,12 @@ public class DefaultQueryHandler implements QueryHandler {
 
 				List<BSONObject> result = new ArrayList<BSONObject>(all.length);
 				candidates: for (BSONObject x : all) {
-					for (Map.Entry<String, QueryPredicate> e : filters
+					for (Map.Entry<String, List<QueryPredicate>> e : filters
 							.entrySet()) {
 						Object xx = x.get(e.getKey());
-						if (!e.getValue().test(xx))
-							continue candidates;
+						for (QueryPredicate q : e.getValue())
+							if (!q.test(xx))
+								continue candidates;
 
 					}
 					result.add(x);
@@ -168,6 +160,18 @@ public class DefaultQueryHandler implements QueryHandler {
 		}
 
 		return new BSONObject[0];
+	}
+
+	private void multiPut(Map<String, List<QueryPredicate>> map, String field,
+			QueryPredicate filter) {
+		List<QueryPredicate> existing = map.get(field);
+		if (existing != null)
+			existing.add(filter);
+		else {
+			List<QueryPredicate> n = new ArrayList<QueryPredicate>();
+			n.add(filter);
+			map.put(field, n);
+		}
 	}
 
 	private BSONObject[] findAll(MockDB db, String database, String collection,
