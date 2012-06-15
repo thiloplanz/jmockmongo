@@ -28,7 +28,7 @@ import org.bson.types.ObjectId;
 class BSONComparator implements Comparator<Object> {
 
 	static final BSONComparator INSTANCE = new BSONComparator();
-	
+
 	@SuppressWarnings("unchecked")
 	public int compare(Object o1, Object o2) {
 		if (o1 == o2)
@@ -36,17 +36,18 @@ class BSONComparator implements Comparator<Object> {
 		int t1 = getBSONType(o1);
 		int t2 = getBSONType(o2);
 		if (t1 != t2)
-			return t1-t2;
-		if (o1 instanceof Integer || o1 instanceof String || o1 instanceof Number || o1 instanceof ObjectId )
-			return ((Comparable)o1).compareTo(o2);
-		if (o1 instanceof BSONObject){
+			return t1 - t2;
+		if (o1 instanceof Integer || o1 instanceof String
+				|| o1 instanceof Number || o1 instanceof ObjectId)
+			return ((Comparable) o1).compareTo(o2);
+		if (o1 instanceof BSONObject) {
 			// compare key-value-key-value-... in order
 			BSONObject b1 = (BSONObject) o1;
 			BSONObject b2 = (BSONObject) o2;
 			List<String> keys1 = new ArrayList<String>(b1.keySet());
 			List<String> keys2 = new ArrayList<String>(b2.keySet());
 			int m = Math.min(keys1.size(), keys2.size());
-			for (int i=0; i<m; i++){
+			for (int i = 0; i < m; i++) {
 				// key
 				String k1 = keys1.get(i);
 				String k2 = keys2.get(i);
@@ -64,11 +65,31 @@ class BSONComparator implements Comparator<Object> {
 				return 1;
 			return -1;
 		}
-		throw new IllegalArgumentException("cannot compare "+ o1.getClass().getName());
+		if (o1 instanceof byte[]) {
+			byte[] b1 = (byte[]) o1;
+			byte[] b2 = (byte[]) o2;
+			int m = Math.min(b1.length, b2.length);
+			for (int i = 0; i < m; i++) {
+				// unsigned !
+				int a = b1[i] & 0xFF;
+				int b = b2[i] & 0xFF;
+				if (a < b)
+					return -1;
+				if (a > b)
+					return 1;
+			}
+			if (b1.length == b2.length)
+				return 0;
+			if (b1.length > b2.length)
+				return 1;
+			return -1;
+		}
+
+		throw new IllegalArgumentException("cannot compare "
+				+ o1.getClass().getName());
 	}
 
-	
-	static byte getBSONType(Object x){
+	static byte getBSONType(Object x) {
 		if (x == null)
 			return BSON.NULL;
 		if (x instanceof String)
@@ -83,6 +104,8 @@ class BSONComparator implements Comparator<Object> {
 			return BSON.OBJECT;
 		if (x instanceof Double)
 			return BSON.NUMBER;
+		if (x instanceof byte[])
+			return BSON.BINARY;
 		throw new IllegalArgumentException(x.getClass().getName());
 	}
 }

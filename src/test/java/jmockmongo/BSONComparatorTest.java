@@ -17,10 +17,10 @@
  */
 package jmockmongo;
 
+import junit.framework.TestCase;
+
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
-
-import junit.framework.TestCase;
 
 public class BSONComparatorTest extends TestCase {
 
@@ -58,4 +58,28 @@ public class BSONComparatorTest extends TestCase {
 		}
 
 	}
+
+	public void testBinary() {
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 },
+				new byte[] { 2 }) < 0);
+
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 },
+				new byte[] { 1, 2 }) < 0);
+
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1, 2 },
+				new byte[] { 1, 3 }) < 0);
+
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 },
+				new byte[] { 0 }) > 0);
+		assertEquals(0, BSONComparator.INSTANCE.compare(new byte[] { 2 },
+				new byte[] { 2 }));
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 }, 1.0d) > 0);
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 }, "1") > 0);
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 }, 1l) < 0);
+
+		assertTrue(BSONComparator.INSTANCE.compare(new byte[] { 1 },
+				new byte[] { (byte) 0xFF }) < 0);
+
+	}
+
 }
