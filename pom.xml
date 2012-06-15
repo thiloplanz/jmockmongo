@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>jmockmongo</groupId>
 	<artifactId>jmockmongo</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>Mocking MongoDB</name>
 	<description>Disturbingly incomplete in-memory MongoDB implementation for use in automated testing</description>
 	<licenses>

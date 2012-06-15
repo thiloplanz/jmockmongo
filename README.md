@@ -86,7 +86,7 @@ You can download jmockmongo release builds from a Maven repository [powered by C
     <dependency>
 		<groupId>jmockmongo</groupId>
 		<artifactId>jmockmongo</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.2</version>
 		<scope>test</scope>
 	</dependency>
 
