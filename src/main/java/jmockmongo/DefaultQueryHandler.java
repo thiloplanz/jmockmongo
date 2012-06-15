@@ -81,6 +81,14 @@ public class DefaultQueryHandler implements QueryHandler {
 								multiPut(filters, field, new LowerThan(options
 										.get(s)));
 								id = null;
+							} else if (QueryOperators.GTE.equals(s)) {
+								multiPut(filters, field,
+										new GreaterThanOrEqual(options.get(s)));
+								id = null;
+							} else if (QueryOperators.LTE.equals(s)) {
+								multiPut(filters, field, new LowerThanOrEqual(
+										options.get(s)));
+								id = null;
 							} else if (s.startsWith("$"))
 								throw new UnsupportedOperationException(s
 										+ " queries are not implemented:"
@@ -114,6 +122,12 @@ public class DefaultQueryHandler implements QueryHandler {
 							} else if (QueryOperators.LT.equals(f)) {
 								multiPut(filters, field, new LowerThan(options
 										.get(f)));
+							} else if (QueryOperators.GTE.equals(f)) {
+								multiPut(filters, field,
+										new GreaterThanOrEqual(options.get(f)));
+							} else if (QueryOperators.LTE.equals(f)) {
+								multiPut(filters, field, new LowerThanOrEqual(
+										options.get(f)));
 							} else {
 								throw new UnsupportedOperationException(
 										"unsupported query " + f + " for "
