@@ -86,7 +86,7 @@ You can download jmockmongo release builds from a Maven repository [powered by C
     <dependency>
 		<groupId>jmockmongo</groupId>
 		<artifactId>jmockmongo</artifactId>
-		<version>0.0.1</version>
+		<version>0.0.2</version>
 		<scope>test</scope>
 	</dependency>
 
@@ -100,3 +100,6 @@ If you want to mock-test your MongoDB code, you may also want to take a look aro
 
 
 [BlueEyes](https://github.com/jdegoes/blueeyes) is a Scala Web framework that includes a mocking library for MongoDB. However, it does seem to be tied against their own MongoDB wrapper and can probably not be used unless you build on top of that wrapper.
+
+[Flapdoodle Embedded MongoDB](https://github.com/flapdoodle-oss/embedmongo.flapdoodle.de) provides for a platform neutral way
+to run a real mongodb instance exclusively for unittests.
