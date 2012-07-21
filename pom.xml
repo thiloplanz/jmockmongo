@@ -3,14 +3,30 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>jmockmongo</groupId>
 	<artifactId>jmockmongo</artifactId>
+	<packaging>jar</packaging>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>Mocking MongoDB</name>
 	<description>Disturbingly incomplete in-memory MongoDB implementation for use in automated testing</description>
+	<url>https://github.com/thiloplanz/jmockmongo</url>
 	<licenses>
 		<license>
-			<name>Apache License Version 2.0</name>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	<scm>
+		<connection>scm:git:git://github.com/thiloplanz/jmockmongo.git</connection>
+		<url>scm:git:git://github.com/thiloplanz/jmockmongo.git</url>
+		<developerConnection>scm:git:git://github.com/thiloplanz/jmockmongo.git</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<id>thiloplanz</id>
+			<name>Thilo Planz</name>
+			<email>thilo@cpan.org</email>
+		</developer>
+	</developers>
 	<inceptionYear>2012</inceptionYear>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
