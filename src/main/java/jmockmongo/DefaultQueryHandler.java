@@ -105,11 +105,13 @@ public class DefaultQueryHandler implements QueryHandler {
 								"nested field queries are not implemented: "
 										+ command);
 					Object value = command.get(field);
-					if (value instanceof String || value instanceof ObjectId
+					if (value instanceof String 
+							|| value instanceof ObjectId
 							|| value instanceof Long
-							|| value instanceof Integer) {
-						multiPut(filters, field, new Equality(
-								new Object[] { value }));
+							|| value instanceof Integer
+							|| value instanceof Boolean) {
+						multiPut(filters, field, 
+								new Equality(new Object[] { value }));
 					} else if (value instanceof BSONObject) {
 						BSONObject options = (BSONObject) value;
 						for (String f : options.keySet()) {
