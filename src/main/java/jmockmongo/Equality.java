@@ -25,9 +25,11 @@ class Equality implements QueryPredicate {
 
 	Equality(Object[] options) {
 		for (Object o: options){
-			if (o instanceof String || o instanceof ObjectId
+			if (o instanceof String 
+					|| o instanceof ObjectId
 					|| o instanceof Long
-					|| o instanceof Integer) {
+					|| o instanceof Integer
+					|| o instanceof Boolean) {
 				continue;
 			}
 			throw new UnsupportedOperationException("unsupported datatype for $eq: "+o.getClass().getName());
