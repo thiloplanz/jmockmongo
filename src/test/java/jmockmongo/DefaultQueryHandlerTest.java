@@ -150,6 +150,24 @@ public class DefaultQueryHandlerTest extends MockMongoTestCaseSupport {
 				new BasicDBObject("not field", 1l)).toArray().toString());
 	}
 
+	public void testFindByField_Boolean() throws UnknownHostException,
+			MongoException, InterruptedException {
+
+		prepareMockData("x.x", new BasicBSONObject("_id", "x").append("field",
+				false));
+
+		Mongo m = getMongo();
+		assertEquals("[{ \"_id\" : \"x\" , \"field\" : false}]", m.getDB("x")
+				.getCollection("x").find(new BasicDBObject("field", false))
+				.toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", 1)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("field", true)).toArray().toString());
+		assertEquals("[]", m.getDB("x").getCollection("x").find(
+				new BasicDBObject("not field", false)).toArray().toString());
+	}
+
 	public void testFindByFieldAndId() throws UnknownHostException,
 			MongoException, InterruptedException {
 

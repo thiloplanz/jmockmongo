@@ -30,6 +30,14 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.QueryOperators;
 
+
+/**
+ * 
+ * @author Thilo Planz
+ * @author Justin Corpron
+ *
+ */
+
 public class DefaultQueryHandler implements QueryHandler {
 
 	private final MockMongo mongo;;

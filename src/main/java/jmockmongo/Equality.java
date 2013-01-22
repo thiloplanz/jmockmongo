@@ -19,20 +19,26 @@ package jmockmongo;
 
 import org.bson.types.ObjectId;
 
+/**
+ * 
+ * @author Thilo Planz
+ * @author Justin Corpron
+ * 
+ */
+
 class Equality implements QueryPredicate {
 
 	private final Object[] options;
 
 	Equality(Object[] options) {
-		for (Object o: options){
-			if (o instanceof String 
-					|| o instanceof ObjectId
-					|| o instanceof Long
-					|| o instanceof Integer
+		for (Object o : options) {
+			if (o instanceof String || o instanceof ObjectId
+					|| o instanceof Long || o instanceof Integer
 					|| o instanceof Boolean) {
 				continue;
 			}
-			throw new UnsupportedOperationException("unsupported datatype for $eq: "+o.getClass().getName());
+			throw new UnsupportedOperationException(
+					"unsupported datatype for $eq: " + o.getClass().getName());
 		}
 		this.options = options;
 	}
