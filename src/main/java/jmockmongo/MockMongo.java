@@ -50,14 +50,6 @@ import com.mongodb.MongoURI;
 public class MockMongo {
 
 	/**
-	 * the port JMockMongo listens to by default. This is different from the
-	 * real MongoDB default port to reduce the risk of accidentally connecting
-	 * test code to real databases.
-	 *
-	 */
-	public static final int DEFAULT_PORT = 2307;
-
-	/**
 	 * Utility method to find a free port
 	 */
 	public static int anyPort() {
@@ -67,15 +59,9 @@ public class MockMongo {
 			socket.close();
 			return port;
 		} catch (IOException e) {
-			return DEFAULT_PORT;
+			return 2307;
 		}
-  }
-
-	/**
-	 * The MongoURI to connect to the default JMockMongo port (on localhost)
-	 */
-	public static final MongoURI DEFAULT_URI = new MongoURI(
-			"mongodb://0.0.0.0:" + DEFAULT_PORT);
+	}
 
 	private int port;
 
@@ -87,7 +73,7 @@ public class MockMongo {
 
 	private ConcurrentHashMap<String, MockDB> data;
 
-  MockMongo() {
+	MockMongo() {
 		this(MockMongo.anyPort());
 	}
 

@@ -58,10 +58,7 @@ public class MockMongoTest extends TestCase {
 		} catch (ChannelException e) {
 
 		} finally {
-			if (socket != null) {
-				socket.close();
-			}
-			
+			socket.close();
 		}
 	}
 }
