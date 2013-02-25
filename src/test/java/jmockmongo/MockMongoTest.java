@@ -36,10 +36,10 @@ public class MockMongoTest extends TestCase {
 
 		MockMongo mongo = new MockMongo();
 		mongo.start();
-		new Mongo(MockMongo.DEFAULT_URI).getDatabaseNames();
+		new Mongo(mongo.getMongoURI()).getDatabaseNames();
 		mongo.stop();
 		try {
-			new Mongo(MockMongo.DEFAULT_URI).getDatabaseNames();
+			new Mongo(mongo.getMongoURI()).getDatabaseNames();
 			fail("should have stopped");
 		} catch (MongoException e) {
 		}
@@ -48,10 +48,11 @@ public class MockMongoTest extends TestCase {
 	public void testCannotBind() throws MongoException, InterruptedException,
 			IOException {
 
-		ServerSocket socket = new ServerSocket(MockMongo.DEFAULT_PORT);
+		int port = MockMongo.anyPort();
+		ServerSocket socket = new ServerSocket(port);
 		try {
 
-			MockMongo mongo = new MockMongo();
+			MockMongo mongo = new MockMongo(port);
 			mongo.start();
 			fail("should have failed to start, because the server port is not available");
 		} catch (ChannelException e) {

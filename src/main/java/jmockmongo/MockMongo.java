@@ -19,8 +19,10 @@
 package jmockmongo;
 
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.io.IOException;
 
 import jmockmongo.commands.Count;
 import jmockmongo.commands.DbStats;
@@ -48,24 +50,45 @@ import com.mongodb.MongoURI;
 public class MockMongo {
 
 	/**
-	 * the port JMockMongo listens to by default. This is different from the
-	 * real MongoDB default port to reduce the risk of accidentally connecting
-	 * test code to real databases.
-	 * 
+	 * Utility method to find a free port
 	 */
-	public static final int DEFAULT_PORT = 2307;
+	public static int anyPort() {
+		try {
+			ServerSocket socket = new ServerSocket(0);
+			int port = socket.getLocalPort();
+			socket.close();
+			return port;
+		} catch (IOException e) {
+			return 2307;
+		}
+	}
 
-	/**
-	 * The MongoURI to connect to the default JMockMongo port (on localhost)
-	 */
-	public static final MongoURI DEFAULT_URI = new MongoURI(
-			"mongodb://0.0.0.0:" + DEFAULT_PORT);
+	private int port;
+
+	private MongoURI uri;
 
 	private ChannelGroup channels;
 
 	private ServerBootstrap bootstrap;
 
 	private ConcurrentHashMap<String, MockDB> data;
+
+	MockMongo() {
+		this(MockMongo.anyPort());
+	}
+
+	MockMongo(int port) {
+	  this.port = port;
+	  this.uri = new MongoURI("mongodb://0.0.0.0:" + port);
+	}
+
+	int getPort() {
+		return port;
+	}
+
+	MongoURI getMongoURI() {
+		return uri;
+	}
 
 	MockDB getDB(String database) {
 		return data.get(database);
@@ -98,6 +121,8 @@ public class MockMongo {
 			return null;
 		return db.getCollection(collectionName);
 	}
+
+
 
 	public void start() {
 		data = new ConcurrentHashMap<String, MockDB>();
@@ -144,7 +169,7 @@ public class MockMongo {
 			}
 		});
 
-		channels.add(bootstrap.bind(new InetSocketAddress(DEFAULT_PORT)));
+		channels.add(bootstrap.bind(new InetSocketAddress(port)));
 	}
 
 	public void stop() {
