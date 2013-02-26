@@ -18,11 +18,11 @@
 
 package jmockmongo;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.io.IOException;
 
 import jmockmongo.commands.Count;
 import jmockmongo.commands.DbStats;
@@ -47,25 +47,28 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import com.mongodb.MongoURI;
 
+/**
+ * 
+ * @author Thilo Planz
+ * @author Julien Polo
+ * 
+ */
+
 public class MockMongo {
 
 	/**
 	 * Utility method to find a free port
 	 */
-	public static int anyPort() {
-		try {
-			ServerSocket socket = new ServerSocket(0);
-			int port = socket.getLocalPort();
-			socket.close();
-			return port;
-		} catch (IOException e) {
-			return 2307;
-		}
+	static int anyPort() throws IOException {
+		ServerSocket socket = new ServerSocket(0);
+		int port = socket.getLocalPort();
+		socket.close();
+		return port;
 	}
 
-	private int port;
+	private final int port;
 
-	private MongoURI uri;
+	private final MongoURI uri;
 
 	private ChannelGroup channels;
 
@@ -74,19 +77,24 @@ public class MockMongo {
 	private ConcurrentHashMap<String, MockDB> data;
 
 	MockMongo() {
-		this(MockMongo.anyPort());
+		try {
+			this.port = MockMongo.anyPort();
+			this.uri = new MongoURI("mongodb://0.0.0.0:" + port);
+		} catch (IOException e) {
+			throw new RuntimeException("failed to find a free port", e);
+		}
 	}
 
 	MockMongo(int port) {
-	  this.port = port;
-	  this.uri = new MongoURI("mongodb://0.0.0.0:" + port);
+		this.port = port;
+		this.uri = new MongoURI("mongodb://0.0.0.0:" + port);
 	}
 
-	int getPort() {
+	public int getPort() {
 		return port;
 	}
 
-	MongoURI getMongoURI() {
+	public MongoURI getMongoURI() {
 		return uri;
 	}
 
@@ -121,8 +129,6 @@ public class MockMongo {
 			return null;
 		return db.getCollection(collectionName);
 	}
-
-
 
 	public void start() {
 		data = new ConcurrentHashMap<String, MockDB>();

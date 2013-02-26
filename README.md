@@ -6,17 +6,31 @@ This has the advantage that you can run your code (with the standard MongoDB Jav
 
 Only very few commands and queries are implemented. This is very much a work in progress, and progress only happens on demand (which at the moment is just me when I need to improve test coverage of my projects).
 
-## Port 2307
+## Database server port
 
 Early versions of jmockmongo listened on the same default port used
-by MongoDB (port 27017). That was convenient, because you did not have to configure the Mongo client being tested at all. However, it was also quite risky, because it made it easy for automated tests
+by MongoDB (port 27017). That was convenient, because you did not have to configure the Mongo client being tested at all. 
+
+However, it was also quite risky, because it made it easy for automated tests
 to accidentally connect to (and possibly damage) real databases,
 especially since MongoDB allows connections without passwords,
 usually listens (via mongos) on each application server's localhost,
 and will serve queries against non-existing databases and collections
 quite happily.
 
-So instead, jmockmongo now listens on port 2307. 
+So instead, jmockmongo now selects any available server port and binds to that.
+You have to query it for which port that is after it has been started:
+
+    MockMongo mock = new MockMongo();
+    MongoURI uri = mock.getMongoURI();
+    // or 
+    int port = mock.getPort();
+    
+As an alternative, you can also explicitly specify any port you want:
+
+    MockMongo mock = new MockMongo(2307);
+
+    
 
 ## Example
 
@@ -26,20 +40,22 @@ So instead, jmockmongo now listens on port 2307.
      mock.start();
 
      // use the normal MongoDB client to talk to it
-     Mongo mongo = 
-       new Mongo("0.0.0.0", 2307); 
-       // or new Mongo(MockMongo.DEFAULT_URI);
-  
+     Mongo mongo = new Mongo(mock.getMongoURI()); 
+   
      mongo.getDatabase("test").getCollection("test").insert(
        new BasicDBObject("x", 1));
      
      // shutdown (necessary to unbind the server port)
      mock.stop();
      
+     
+   
+     
+    
 
 ### with JUnit
 
-If you are using JUnit, there is a helper TestCase base class that starts and stops the mock MongoDB in the setup and teardown methods, and has helpers to bootstrap test data and assert results.
+If you are using JUnit 3, there is a helper TestCase base class that starts and stops the mock MongoDB in the setup and teardown methods, and has helpers to bootstrap test data and assert results.
 
 
     public class UpdateTest extends MockMongoTestCaseSupport {

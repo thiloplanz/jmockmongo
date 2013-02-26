@@ -29,6 +29,13 @@ import com.mongodb.DBPort;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
 
+/**
+ * 
+ * @author Thilo Planz
+ * @author Julien Polo
+ * 
+ */
+
 public abstract class MockMongoTestCaseSupport extends TestCase {
 
 	private MockMongo mockMongo;
@@ -39,9 +46,9 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 	protected void setUp() throws Exception {
 		// make sure we cannot connect before this
 		// (this could mean a real server is running on our port)
-		
+
 		mockMongo = new MockMongo();
-		
+
 		try {
 			new DBPort(new ServerAddress("0.0.0.0", mockMongo.getPort()))
 					.ensureOpen();
@@ -49,7 +56,7 @@ public abstract class MockMongoTestCaseSupport extends TestCase {
 		} catch (IOException e) {
 		}
 		mockMongo.start();
-		
+
 		mongo = new Mongo(mockMongo.getMongoURI());
 	}
 

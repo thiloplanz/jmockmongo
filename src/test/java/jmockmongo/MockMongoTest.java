@@ -29,6 +29,13 @@ import org.jboss.netty.channel.ChannelException;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+/**
+ * 
+ * @author Thilo Planz
+ * @author Julien Polo
+ * 
+ */
+
 public class MockMongoTest extends TestCase {
 
 	public void testStartStop() throws UnknownHostException, MongoException,
