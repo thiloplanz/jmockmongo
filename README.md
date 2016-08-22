@@ -6,6 +6,10 @@ This has the advantage that you can run your code (with the standard MongoDB Jav
 
 Only very few commands and queries are implemented. This is very much a work in progress, and progress only happens on demand (which at the moment is just me when I need to improve test coverage of my projects).
 
+## Try Fongo first !
+
+**If you need something more mature, complete, and maintained take a look at [Fongo](https://github.com/fakemongo/fongo). It does the same thing, except that it does it much better.**
+
 ## Database server port
 
 Early versions of jmockmongo listened on the same default port used
@@ -110,7 +114,7 @@ You can download jmockmongo release builds from a Maven repository [powered by C
 
 
 
-## Prior Art
+## Prior and/or Preferable Art
 
 If you want to mock-test your MongoDB code, you may also want to take a look around for other projects that might do a better job of it.
 
@@ -119,3 +123,5 @@ If you want to mock-test your MongoDB code, you may also want to take a look aro
 
 [Flapdoodle Embedded MongoDB](https://github.com/flapdoodle-oss/embedmongo.flapdoodle.de) provides for a platform neutral way
 to run a real mongodb instance exclusively for unittests.
+
+The aforementioned [Fongo](https://github.com/fakemongo/fongo).
